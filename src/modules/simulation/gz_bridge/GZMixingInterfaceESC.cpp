@@ -39,6 +39,8 @@ bool GZMixingInterfaceESC::init(const std::string &model_name)
 	// ESC feedback: /x500/command/motor_speed
 	std::string motor_speed_topic = "/" + model_name + "/command/motor_speed";
 
+	std::cout << "Motor speed topic: " << motor_speed_topic << std::endl;
+
 	if (!_node.Subscribe(motor_speed_topic, &GZMixingInterfaceESC::motorSpeedCallback, this)) {
 		PX4_ERR("failed to subscribe to %s", motor_speed_topic.c_str());
 		return false;
