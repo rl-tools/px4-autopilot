@@ -93,8 +93,9 @@ private:
 
 	differential_drive_control_kinematics _controller;
 
-	matrix::Vector2f _input{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
-	matrix::Vector2f _output{0.0f, 0.0f}; // output_[0] -> Right Motor [rad/s], output_[1] -> Left Motor [rad/s]
+	matrix::Vector2f _input_pid{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
+	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
+	matrix::Vector2f _output{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 
 	uint8_t _arming_state{0};
 	bool _system_calibrating{false};

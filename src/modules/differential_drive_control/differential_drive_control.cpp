@@ -70,7 +70,8 @@ int DifferentialDriveControl::task_spawn(int argc, char *argv[])
 
 void DifferentialDriveControl::start()
 {
-	ScheduleOnInterval(20_ms); // 50 Hz
+	// ScheduleOnInterval(20_ms); // 50 Hz
+	ScheduleOnInterval(1_s);
 }
 
 void DifferentialDriveControl::Run()
@@ -113,11 +114,13 @@ void DifferentialDriveControl::Run()
 		subscribeManualControl();
 	}
 
-	_controller.setInput(_input);
+	// PX4_ERR("My input. vx: %f and yaw: %f", (double)_input(0), (double)_input(1));
 
-	_controller.computeControl();
+	_controller.setInput(_input_feed_forward + _input_pid, true);
 
 	_output = _controller.getOutput();
+
+	// PX4_ERR("My ouput. right: %f and left: %f", (double)_output(0), (double)_output(1));
 
 	publishRateControl();
 
@@ -128,8 +131,8 @@ void DifferentialDriveControl::subscribeManualControl()
 {
 	_manual_control_setpoint_sub.copy(&_manual_control_setpoint);
 
-	_input(0) = _manual_control_setpoint.throttle;
-	_input(1) = _manual_control_setpoint.roll;
+	_input_feed_forward(0) = _manual_control_setpoint.throttle;
+	_input_feed_forward(1) = _manual_control_setpoint.roll;
 }
 
 void DifferentialDriveControl::publishRateControl()

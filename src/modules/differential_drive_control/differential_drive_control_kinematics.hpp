@@ -46,21 +46,25 @@ public:
 	differential_drive_control_kinematics() : ModuleParams(this) {};
 	~differential_drive_control_kinematics() = default;
 
-	void computeControl();
-	void setInput(const matrix::Vector2f& input);
+	void computeInverseKinematics();
+	void computeForwardsKinematics();
+	void setInput(const matrix::Vector2f& input, bool inverse);
 	matrix::Vector2f getOutput() const;
+
+	float pid();
+
 
 private:
 
-	// Input & Output
+	// Input & Output (Don't really need input tbh, but lets see)
 	matrix::Vector2f _input{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
-	matrix::Vector2f _output{0.0f, 0.0f}; // output_[0] -> Right Motor [rad/s], output_[1] -> Left Motor [rad/s]
+	matrix::Vector2f _output{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 
-	float _vx{0.0f};
-	float _omega{0.0f};
+	float _linear_vel_x{0.0f};
+	float _yaw_rate{0.0f};
 
-	float _motor_vel_left{0.0f};
 	float _motor_vel_right{0.0f};
+	float _motor_vel_left{0.0f};
 
 
 	DEFINE_PARAMETERS(
