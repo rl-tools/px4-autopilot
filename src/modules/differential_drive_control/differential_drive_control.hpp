@@ -46,6 +46,7 @@
 #include <uORB/topics/differential_drive_control.h>
 #include <uORB/topics/vehicle_angular_velocity.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/Publication.hpp>
 #include <uORB/Subscription.hpp>
 
@@ -80,6 +81,8 @@ private:
 	void Run() override;
 	void publishRateControl();
 	void subscribeManualControl();
+	void subscribeAutoControl();
+	void vehicle_control_mode_poll();
 
 	uORB::Publication<differential_drive_control_s> _differential_drive_control_pub{ORB_ID(differential_drive_control)};
 
@@ -87,9 +90,11 @@ private:
 	uORB::Subscription _vehicle_angular_velocity_sub{ORB_ID(vehicle_angular_velocity)};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
 	uORB::Subscription _manual_control_setpoint_sub{ORB_ID(manual_control_setpoint)};
+	uORB::Subscription _control_mode_sub{ORB_ID(vehicle_control_mode)};
 
 	differential_drive_control_s 		_diff_drive_control{};
 	manual_control_setpoint_s		_manual_control_setpoint{};
+	vehicle_control_mode_s			_control_mode{};
 
 	differential_drive_control_kinematics _controller;
 

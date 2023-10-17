@@ -110,21 +110,32 @@ void DifferentialDriveControl::Run()
 		updateParams();
 	}
 
-	if(true){ // change this to manual flag
-		subscribeManualControl();
-	}
 
-	// PX4_ERR("My input. vx: %f and yaw: %f", (double)_input(0), (double)_input(1));
+
+	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
+		subscribeManualControl();
+	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) { // temporary, unless we wont have more than just these two modes
+		subscribeAutoControl();
+	} else {
+		_input_pid = {0.0f, 0.0f};
+		_input_feed_forward = {0.0f, 0.0f};
+	}
 
 	_controller.setInput(_input_feed_forward + _input_pid, true);
 
 	_output = _controller.getOutput();
 
-	// PX4_ERR("My ouput. right: %f and left: %f", (double)_output(0), (double)_output(1));
-
 	publishRateControl();
 
 
+}
+
+void
+DifferentialDriveControl::vehicle_control_mode_poll()
+{
+	if (_control_mode_sub.updated()) {
+		_control_mode_sub.copy(&_control_mode);
+	}
 }
 
 void DifferentialDriveControl::subscribeManualControl()
@@ -133,6 +144,12 @@ void DifferentialDriveControl::subscribeManualControl()
 
 	_input_feed_forward(0) = _manual_control_setpoint.throttle;
 	_input_feed_forward(1) = _manual_control_setpoint.roll;
+}
+
+void DifferentialDriveControl::subscribeAutoControl()
+{
+	PX4_ERR("TO DO: Write Auto Control Logic");
+	return;
 }
 
 void DifferentialDriveControl::publishRateControl()
