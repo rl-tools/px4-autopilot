@@ -130,18 +130,6 @@
 	    <sensor name="imu_sensor" type="imu">
 		<always_on>1</always_on>
 		<update_rate>250</update_rate>
-	    </sensor>
-	    <sensor name="air_pressure_sensor" type="air_pressure">
-		<always_on>1</always_on>
-		<update_rate>50</update_rate>
-		<air_pressure>
-		  <pressure>
-		    <noise type="gaussian">
-		      <mean>0</mean>
-		      <stddev>0.01</stddev>
-		    </noise>
-		  </pressure>
-		</air_pressure>
 	      </sensor>
 	  </link>
 	  <link name='lb_wheel_link'>
@@ -214,7 +202,7 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_1' type='revolute'>
+	  <!-- <joint name='rotor_0' type='revolute'>
 	    <child>lb_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -230,6 +218,150 @@
 	      <use_parent_model_frame>1</use_parent_model_frame>
 	    </axis>
 	  </joint>
+	  <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+		<jointName>rotor_0</jointName>
+		<linkName>lb_wheel_link</linkName>
+		<turningDirection>ccw</turningDirection>
+		<timeConstantUp>0.0125</timeConstantUp>
+		<timeConstantDown>0.025</timeConstantDown>
+		<maxRotVelocity>1500</maxRotVelocity>
+		<motorConstant>2e-05</motorConstant>
+		<momentConstant>0.06</momentConstant>
+		<commandSubTopic>command/motor_speed</commandSubTopic>
+		<motorNumber>0</motorNumber>
+		<rotorDragCoefficient>0.000106428</rotorDragCoefficient>
+		<rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+		<rotorVelocitySlowdownSim>20</rotorVelocitySlowdownSim>
+		<motorType>velocity</motorType>
+	      </plugin> -->
+	<joint name='rotor_0' type='revolute'>
+	<child>rb_wheel_link</child>
+	<parent>base_link</parent>
+	<axis>
+		<xyz>0 1 0</xyz>
+		<limit>
+		<lower>-1e+16</lower>
+		<upper>1e+16</upper>
+		</limit>
+		<dynamics>
+		<spring_reference>0</spring_reference>
+		<spring_stiffness>0</spring_stiffness>
+		</dynamics>
+		<use_parent_model_frame>1</use_parent_model_frame>
+	</axis>
+	</joint>
+	<plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+		<jointName>rotor_0</jointName>
+		<linkName>rb_wheel_link</linkName>
+		<turningDirection>ccw</turningDirection>
+		<timeConstantUp>0.0125</timeConstantUp>
+		<timeConstantDown>0.025</timeConstantDown>
+		<maxRotVelocity>1500</maxRotVelocity>
+		<motorConstant>2e-05</motorConstant>
+		<momentConstant>0.06</momentConstant>
+		<commandSubTopic>command/motor_speed</commandSubTopic>
+		<motorNumber>0</motorNumber>
+		<rotorDragCoefficient>0.000106428</rotorDragCoefficient>
+		<rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+		<rotorVelocitySlowdownSim>20</rotorVelocitySlowdownSim>
+		<motorType>velocity</motorType>
+		</plugin>
+		<joint name='rotor_1' type='revolute'>
+		<child>lb_wheel_link</child>
+		<parent>base_link</parent>
+		<axis>
+			<xyz>0 1 0</xyz>
+			<limit>
+			<lower>-1e+16</lower>
+			<upper>1e+16</upper>
+			</limit>
+			<dynamics>
+			<spring_reference>0</spring_reference>
+			<spring_stiffness>0</spring_stiffness>
+			</dynamics>
+			<use_parent_model_frame>1</use_parent_model_frame>
+		</axis>
+		</joint>
+		<plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+			<jointName>rotor_1</jointName>
+			<linkName>lf_wheel_link</linkName>
+			<turningDirection>ccw</turningDirection>
+			<timeConstantUp>0.0125</timeConstantUp>
+			<timeConstantDown>0.025</timeConstantDown>
+			<maxRotVelocity>1500</maxRotVelocity>
+			<motorConstant>2e-05</motorConstant>
+			<momentConstant>0.06</momentConstant>
+			<commandSubTopic>command/motor_speed</commandSubTopic>
+			<motorNumber>0</motorNumber>
+			<rotorDragCoefficient>0.000106428</rotorDragCoefficient>
+			<rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+			<rotorVelocitySlowdownSim>20</rotorVelocitySlowdownSim>
+			<motorType>velocity</motorType>
+			</plugin>
+			<joint name='rotor_2' type='revolute'>
+			<child>lb_wheel_link</child>
+			<parent>base_link</parent>
+			<axis>
+				<xyz>0 1 0</xyz>
+				<limit>
+				<lower>-1e+16</lower>
+				<upper>1e+16</upper>
+				</limit>
+				<dynamics>
+				<spring_reference>0</spring_reference>
+				<spring_stiffness>0</spring_stiffness>
+				</dynamics>
+				<use_parent_model_frame>1</use_parent_model_frame>
+			</axis>
+			</joint>
+			<plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+				<jointName>rotor_2</jointName>
+				<linkName>rf_wheel_link</linkName>
+				<turningDirection>ccw</turningDirection>
+				<timeConstantUp>0.0125</timeConstantUp>
+				<timeConstantDown>0.025</timeConstantDown>
+				<maxRotVelocity>1500</maxRotVelocity>
+				<motorConstant>2e-05</motorConstant>
+				<momentConstant>0.06</momentConstant>
+				<commandSubTopic>command/motor_speed</commandSubTopic>
+				<motorNumber>0</motorNumber>
+				<rotorDragCoefficient>0.000106428</rotorDragCoefficient>
+				<rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+				<rotorVelocitySlowdownSim>20</rotorVelocitySlowdownSim>
+				<motorType>velocity</motorType>
+				</plugin>
+				<joint name='rotor_3' type='revolute'>
+					<child>lb_wheel_link</child>
+					<parent>base_link</parent>
+					<axis>
+						<xyz>0 1 0</xyz>
+						<limit>
+						<lower>-1e+16</lower>
+						<upper>1e+16</upper>
+						</limit>
+						<dynamics>
+						<spring_reference>0</spring_reference>
+						<spring_stiffness>0</spring_stiffness>
+						</dynamics>
+						<use_parent_model_frame>1</use_parent_model_frame>
+					</axis>
+					</joint>
+					<plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+						<jointName>rotor_3</jointName>
+						<linkName>lb_wheel_link</linkName>
+						<turningDirection>ccw</turningDirection>
+						<timeConstantUp>0.0125</timeConstantUp>
+						<timeConstantDown>0.025</timeConstantDown>
+						<maxRotVelocity>1500</maxRotVelocity>
+						<motorConstant>2e-05</motorConstant>
+						<momentConstant>0.06</momentConstant>
+						<commandSubTopic>command/motor_speed</commandSubTopic>
+						<motorNumber>0</motorNumber>
+						<rotorDragCoefficient>0.000106428</rotorDragCoefficient>
+						<rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+						<rotorVelocitySlowdownSim>20</rotorVelocitySlowdownSim>
+						<motorType>velocity</motorType>
+						</plugin>
 	  <link name='lf_wheel_link'>
 	    <pose>0.15 0.16317 0.0215 0 -0 0</pose>
 	    <inertial>
@@ -300,7 +432,7 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_0' type='revolute'>
+	  <!-- <joint name='servo_1' type='revolute'>
 	    <child>lf_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -315,7 +447,7 @@
 	      </dynamics>
 	      <use_parent_model_frame>1</use_parent_model_frame>
 	    </axis>
-	  </joint>
+	  </joint> -->
 	  <link name='rb_wheel_link'>
 	    <pose>-0.15 -0.16317 0.0215 0 -0 0</pose>
 	    <inertial>
@@ -384,7 +516,27 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_3' type='revolute'>
+	  <plugin
+      filename="ignition-gazebo-ackermann-steering-system"
+      name="ignition::gazebo::systems::AckermannSteering">
+      <left_joint>rover/FrontLeftWheelJoint</left_joint>
+      <left_joint>rover/RearLeftWheelJoint</left_joint>
+      <right_joint>rover/FrontRightWheelJoint</right_joint>
+      <right_joint>rover/FrontRightWheelJoint</right_joint>
+      <left_steering_joint>rover/FrontLeftWheelSteeringJoint</left_steering_joint>
+      <right_steering_joint>rover/FrontRightWheelSteeringJoint</right_steering_joint>
+      <kingpin_width>.18</kingpin_width>
+      <steering_limit>0.5</steering_limit>
+      <wheel_base>.2255</wheel_base>
+      <wheel_separation>.2</wheel_separation>
+      <wheel_radius>0.0365</wheel_radius>
+      <min_velocity>-100</min_velocity>
+      <max_velocity>100</max_velocity>
+      <min_acceleration>-5</min_acceleration>
+      <max_acceleration>5</max_acceleration>
+      <topic>/cmd_vel</topic>
+    </plugin>
+	  <!-- <joint name='servo_2' type='revolute'>
 	    <child>rb_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -399,7 +551,7 @@
 	      </dynamics>
 	      <use_parent_model_frame>1</use_parent_model_frame>
 	    </axis>
-	  </joint>
+	  </joint> -->
 	  <link name='rf_wheel_link'>
 	    <pose>0.15 -0.16317 0.0215 0 -0 0</pose>
 	    <inertial>
@@ -470,7 +622,7 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_2' type='revolute'>
+	  <!-- <joint name='servo_3' type='revolute'>
 	    <child>rf_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -485,21 +637,98 @@
 	      </dynamics>
 	      <use_parent_model_frame>1</use_parent_model_frame>
 	    </axis>
-	  </joint>
+	  </joint> -->
 	  <static>0</static>
-
-	  <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-		<left_joint>servo_0</left_joint>
-		<left_joint>servo_1</left_joint>
-		<right_joint>servo_2</right_joint>
-		<right_joint>servo_3</right_joint>
-		<wheel_seperation>0.5</wheel_seperation>
-		<wheel_radius>0.2</wheel_radius>
-		<odom_publish_frequency>100</odom_publish_frequency>
+	<!-- <plugin
+	filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+	<joint_name>servo_0</joint_name>
+	<sub_topic>servo_0</sub_topic>
+	</plugin> -->
+	<plugin
+	filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+	<joint_name>servo_1</joint_name>
+	<sub_topic>servo_1</sub_topic>
+	</plugin>
+	<plugin
+	filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+	<joint_name>servo_2</joint_name>
+	<sub_topic>servo_2</sub_topic>
+	</plugin>
+	<plugin
+	filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+	<joint_name>servo_3</joint_name>
+	<sub_topic>servo_3</sub_topic>
+	</plugin>
+	  <!-- <link name='rover/imu_link'>
+	    <pose>0 0 .2 0 0 0</pose>
+	    <inertial>
+	      <pose>0 0 0 0 0 0</pose>
+	      <mass>0.015</mass>
+	      <inertia>
+		<ixx>1e-05</ixx>
+		<ixy>0</ixy>
+		<ixz>0</ixz>
+		<iyy>1e-05</iyy>
+		<iyz>0</iyz>
+		<izz>1e-05</izz>
+	      </inertia>
+	    </inertial>
+	    <visual name='imu_box'>
+	      <pose>0 0 0 0 0 0</pose>
+	      <geometry>
+		<box>
+		  <size>.05 .05 .02</size>
+		</box>
+	      </geometry>
+	      <material>
+		<emissive>1.0 0.0 0.0 1</emissive>
+	      </material>
+	    </visual>
+	  </link> -->
+	  <!-- <joint name='rover/imu_joint' type='revolute'>
+	    <child>rover/imu_link</child>
+	    <parent>base_link</parent>
+	    <axis>
+	      <xyz>1 0 0</xyz>
+	      <limit>
+		<lower>0</lower>
+		<upper>0</upper>
+		<effort>0</effort>
+		<velocity>0</velocity>
+	      </limit>
+	      <dynamics>
+		<spring_reference>0</spring_reference>
+		<spring_stiffness>0</spring_stiffness>
+	      </dynamics>
+	      <use_parent_model_frame>1</use_parent_model_frame>
+	    </axis>
+	  </joint> -->
+	  <!-- <include>
+	    <uri>model://gps</uri>
+	    <pose>0 0 0.12 0 0 0</pose>
+	    <name>gps</name>
+	  </include>
+	  <joint name='gps_joint' type='fixed'>
+	    <child>gps::link</child>
+	    <parent>base_link</parent>
+	  </joint> -->
+	  <!-- <plugin name='gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
+	    <robotNamespace></robotNamespace>
+	    <linkName>rover/imu_link</linkName>
+	    <imuTopic>/imu</imuTopic>
+	    <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
+	    <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
+	    <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
+	    <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma>
+	    <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity>
+	    <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
+	    <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
+	    <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
+	  </plugin> -->
+	  <!-- <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
+	    <robotNamespace/>
 	  </plugin>
-
-
-	  <!-- <plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
+	  <plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
 	    <robotNamespace/>
 	    <pubRate>20</pubRate>
 	    <noiseDensity>0.0004</noiseDensity>
@@ -540,7 +769,7 @@
 		<zero_position_disarmed>0</zero_position_disarmed>
 		<zero_position_armed>0</zero_position_armed>
 		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_0</joint_name>
+		<joint_name>lf_wheel_joint</joint_name>
 		<joint_control_pid>
 		  <p>0.1</p>
 		  <i>0</i>
@@ -558,7 +787,7 @@
 		<zero_position_disarmed>0</zero_position_disarmed>
 		<zero_position_armed>0</zero_position_armed>
 		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_1</joint_name>
+		<joint_name>lb_wheel_joint</joint_name>
 		<joint_control_pid>
 		  <p>0.1</p>
 		  <i>0</i>
@@ -576,7 +805,7 @@
 		<zero_position_disarmed>0</zero_position_disarmed>
 		<zero_position_armed>0</zero_position_armed>
 		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_2</joint_name>
+		<joint_name>rf_wheel_joint</joint_name>
 		<joint_control_pid>
 		  <p>0.1</p>
 		  <i>0</i>
@@ -594,7 +823,7 @@
 		<zero_position_disarmed>0</zero_position_disarmed>
 		<zero_position_armed>0</zero_position_armed>
 		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_3</joint_name>
+		<joint_name>rb_wheel_joint</joint_name>
 		<joint_control_pid>
 		  <p>0.1</p>
 		  <i>0</i>
