@@ -44,6 +44,9 @@ DifferentialDriveControl::DifferentialDriveControl() :
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::lp_default)
 {
 	_differential_drive_control_pub.advertise();
+
+	// temporary
+	// _actuators_pub = _node.Advertise<gz::msgs::Twist>("/model/r1_rover_0/cmd_vel");
 }
 
 DifferentialDriveControl::~DifferentialDriveControl()
@@ -81,6 +84,8 @@ void DifferentialDriveControl::Run()
 		exit_and_cleanup();
 	}
 
+	vehicle_control_mode_poll();
+
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
 
@@ -110,8 +115,6 @@ void DifferentialDriveControl::Run()
 		updateParams();
 	}
 
-
-
 	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
 		subscribeManualControl();
 	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) { // temporary, unless we wont have more than just these two modes
@@ -127,8 +130,52 @@ void DifferentialDriveControl::Run()
 
 	publishRateControl();
 
+	// temporary
+	publishAllocation();
+
+	// setAndPublishActuatorOutputs();
 
 }
+
+//temporary
+void
+DifferentialDriveControl::publishAllocation()
+{
+	vehicle_thrust_setpoint_s v_thrust_sp{};
+	v_thrust_sp.timestamp = hrt_absolute_time();
+	v_thrust_sp.xyz[0] = _manual_control_setpoint.throttle;
+	v_thrust_sp.xyz[1] = 0.0f;
+	v_thrust_sp.xyz[2] = 0.0f;
+	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
+
+	vehicle_torque_setpoint_s v_torque_sp{};
+	v_torque_sp.timestamp = hrt_absolute_time();
+	v_torque_sp.xyz[0] = 0.f;
+	v_torque_sp.xyz[1] = 0.f;
+	v_torque_sp.xyz[2] = _manual_control_setpoint.roll;
+	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
+}
+
+// void
+// DifferentialDriveControl::publish(double linear_x, double angular_z) {
+//     gz::msgs::Twist msg;
+
+//     msg.mutable_linear()->set_x(linear_x);
+//     msg.mutable_angular()->set_z(angular_z);
+
+//     _actuators_pub.Publish(msg);
+// }
+
+// void
+// DifferentialDriveControl::setAndPublishActuatorOutputs()
+// {
+//         _actuator_outputs.noutputs = 2;
+//         for (size_t i = 0; i < 2; ++i) {
+//                 _actuator_outputs.output[i] = _output(i);
+//         }
+//         _actuator_outputs.timestamp = hrt_absolute_time();
+//         _outputs_pub.publish(_actuator_outputs);
+// }
 
 void
 DifferentialDriveControl::vehicle_control_mode_poll()
@@ -144,6 +191,8 @@ void DifferentialDriveControl::subscribeManualControl()
 
 	_input_feed_forward(0) = _manual_control_setpoint.throttle;
 	_input_feed_forward(1) = _manual_control_setpoint.roll;
+
+	// PX4_ERR("My control inputs direcly are %f and %f", (double)_input_feed_forward(0), (double)_input_feed_forward(1));
 }
 
 void DifferentialDriveControl::subscribeAutoControl()

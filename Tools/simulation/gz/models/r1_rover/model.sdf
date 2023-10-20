@@ -214,7 +214,14 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_1' type='revolute'>
+	  <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+	  	<joint_name>motor_0</joint_name>
+	  	<sub_topic>command/motor_speed</sub_topic>
+		<use_actuator_msg>true</use_actuator_msg>
+		<actuator_number>0</actuator_number>
+	  	<p_gain>10.0</p_gain>
+	  </plugin>
+	  <joint name='motor_1' type='revolute'>
 	    <child>lb_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -230,7 +237,28 @@
 	      <use_parent_model_frame>1</use_parent_model_frame>
 	    </axis>
 	  </joint>
-	  <link name='lf_wheel_link'>
+	  <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+		<joint_name>motor_1</joint_name>
+		<sub_topic>command/motor_speed</sub_topic>
+	      <use_actuator_msg>true</use_actuator_msg>
+	      <actuator_number>0</actuator_number>
+		<p_gain>10.0</p_gain>
+         </plugin>
+	 <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+		<joint_name>motor_3</joint_name>
+		<sub_topic>command/motor_speed</sub_topic>
+	      <use_actuator_msg>true</use_actuator_msg>
+	      <actuator_number>1</actuator_number>
+		<p_gain>10.0</p_gain>
+         </plugin>
+	 <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+		<joint_name>motor_2</joint_name>
+		<sub_topic>command/motor_speed</sub_topic>
+	      <use_actuator_msg>true</use_actuator_msg>
+	      <actuator_number>1</actuator_number>
+		<p_gain>10.0</p_gain>
+         </plugin>
+	 <link name='lf_wheel_link'>
 	    <pose>0.15 0.16317 0.0215 0 -0 0</pose>
 	    <inertial>
 	      <pose>0 0 0 1.57079632679 0 0</pose>
@@ -300,7 +328,7 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_0' type='revolute'>
+	  <joint name='motor_0' type='revolute'>
 	    <child>lf_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -384,7 +412,7 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_3' type='revolute'>
+	  <joint name='motor_3' type='revolute'>
 	    <child>rb_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -470,7 +498,7 @@
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <joint name='servo_2' type='revolute'>
+	  <joint name='motor_2' type='revolute'>
 	    <child>rf_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
@@ -488,7 +516,7 @@
 	  </joint>
 	  <static>0</static>
 
-	  <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+	  <!-- <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
 		<left_joint>servo_0</left_joint>
 		<left_joint>servo_1</left_joint>
 		<right_joint>servo_2</right_joint>
@@ -496,7 +524,7 @@
 		<wheel_seperation>0.5</wheel_seperation>
 		<wheel_radius>0.2</wheel_radius>
 		<odom_publish_frequency>100</odom_publish_frequency>
-	  </plugin>
+	  </plugin> -->
 
 
 	  <!-- <plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>

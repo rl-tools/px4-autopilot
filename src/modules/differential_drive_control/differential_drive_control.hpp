@@ -41,6 +41,16 @@
 #include <px4_platform_common/module_params.h>
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 
+#include <uORB/topics/actuator_outputs.h>
+#include <uORB/PublicationMulti.hpp>
+
+// //temporary
+// #include <gz/transport/Node.hh>
+// #include <gz/msgs/twist.pb.h>
+#include <uORB/topics/vehicle_thrust_setpoint.h>
+#include <uORB/topics/vehicle_torque_setpoint.h>
+
+
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/differential_drive_control.h>
@@ -83,8 +93,22 @@ private:
 	void subscribeManualControl();
 	void subscribeAutoControl();
 	void vehicle_control_mode_poll();
+	void setAndPublishActuatorOutputs();
+
+	// temporary
+
+	void publishAllocation();
+
+	// void publish(double linear_x, double angular_z);
 
 	uORB::Publication<differential_drive_control_s> _differential_drive_control_pub{ORB_ID(differential_drive_control)};
+	uORB::PublicationMulti<actuator_outputs_s> _outputs_pub{ORB_ID(actuator_outputs)};
+
+	// temporary 
+
+	uORB::Publication<vehicle_thrust_setpoint_s>	_vehicle_thrust_setpoint_pub{ORB_ID(vehicle_thrust_setpoint)};
+	uORB::Publication<vehicle_torque_setpoint_s>	_vehicle_torque_setpoint_pub{ORB_ID(vehicle_torque_setpoint)};
+
 
 	uORB::Subscription _parameter_update_sub{ORB_ID(parameter_update)};
 	uORB::Subscription _vehicle_angular_velocity_sub{ORB_ID(vehicle_angular_velocity)};
@@ -95,6 +119,7 @@ private:
 	differential_drive_control_s 		_diff_drive_control{};
 	manual_control_setpoint_s		_manual_control_setpoint{};
 	vehicle_control_mode_s			_control_mode{};
+	actuator_outputs_s 			_actuator_outputs{};
 
 	differential_drive_control_kinematics _controller;
 
@@ -104,6 +129,10 @@ private:
 
 	uint8_t _arming_state{0};
 	bool _system_calibrating{false};
+
+	// temporary
+
+	// gz::transport::Node::Publisher _actuators_pub;
 
 };
 

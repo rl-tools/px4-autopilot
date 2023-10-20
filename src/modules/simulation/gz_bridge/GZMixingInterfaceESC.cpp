@@ -37,7 +37,7 @@ bool GZMixingInterfaceESC::init(const std::string &model_name)
 {
 
 	// ESC feedback: /x500/command/motor_speed
-	std::string motor_speed_topic = "/" + model_name + "/command/motor_speed";
+	std::string motor_speed_topic = "/model/" + model_name + "/command/motor_speed";
 
 	std::cout << "Motor speed topic: " << motor_speed_topic << std::endl;
 
@@ -47,7 +47,7 @@ bool GZMixingInterfaceESC::init(const std::string &model_name)
 	}
 
 	// output eg /X500/command/motor_speed
-	std::string actuator_topic = "/" + model_name + "/command/motor_speed";
+	std::string actuator_topic = "/model/" + model_name + "/command/motor_speed";
 	_actuators_pub = _node.Advertise<gz::msgs::Actuators>(actuator_topic);
 
 	if (!_actuators_pub.Valid()) {
