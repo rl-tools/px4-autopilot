@@ -258,6 +258,7 @@
 	      <actuator_number>1</actuator_number>
 		<p_gain>10.0</p_gain>
          </plugin>
+	 <!-- <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/> -->
 	 <link name='lf_wheel_link'>
 	    <pose>0.15 0.16317 0.0215 0 -0 0</pose>
 	    <inertial>

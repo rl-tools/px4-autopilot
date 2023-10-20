@@ -73,8 +73,8 @@ int DifferentialDriveControl::task_spawn(int argc, char *argv[])
 
 void DifferentialDriveControl::start()
 {
-	// ScheduleOnInterval(20_ms); // 50 Hz
-	ScheduleOnInterval(1_s);
+	ScheduleOnInterval(20_ms); // 50 Hz
+	// ScheduleOnInterval(1_s);
 }
 
 void DifferentialDriveControl::Run()
@@ -131,7 +131,7 @@ void DifferentialDriveControl::Run()
 	publishRateControl();
 
 	// temporary
-	publishAllocation();
+	// publishAllocation();
 
 	// setAndPublishActuatorOutputs();
 
@@ -189,8 +189,8 @@ void DifferentialDriveControl::subscribeManualControl()
 {
 	_manual_control_setpoint_sub.copy(&_manual_control_setpoint);
 
-	_input_feed_forward(0) = _manual_control_setpoint.throttle;
-	_input_feed_forward(1) = _manual_control_setpoint.roll;
+	_input_feed_forward(0) = _manual_control_setpoint.throttle*100;
+	_input_feed_forward(1) = _manual_control_setpoint.roll*20;
 
 	// PX4_ERR("My control inputs direcly are %f and %f", (double)_input_feed_forward(0), (double)_input_feed_forward(1));
 }
@@ -208,6 +208,8 @@ void DifferentialDriveControl::publishRateControl()
 
 	diff_drive_control.motor_control[0] = _output(0);
 	diff_drive_control.motor_control[1] = _output(1);
+
+
 
 	diff_drive_control.timestamp = hrt_absolute_time();
 

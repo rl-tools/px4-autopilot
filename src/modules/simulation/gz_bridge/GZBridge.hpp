@@ -57,6 +57,10 @@
 #include <uORB/topics/sensor_baro.h>
 #include <uORB/topics/vehicle_odometry.h>
 
+// perfrivik temporary
+
+#include <uORB/topics/differential_drive_control.h>
+
 #include <gz/math.hh>
 #include <gz/msgs.hh>
 #include <gz/transport.hh>
@@ -102,6 +106,24 @@ private:
 	void imuCallback(const gz::msgs::IMU &imu);
 	void poseInfoCallback(const gz::msgs::Pose_V &pose);
 	void odometryCallback(const gz::msgs::OdometryWithCovariance &odometry);
+
+
+
+	// perfrivik temporary
+
+	void directMotorSub();
+	void directMotorPub();
+
+	uORB::Subscription _differential_drive_control_sub{ORB_ID(differential_drive_control)};
+
+	differential_drive_control_s 		_diff_drive_control{};
+
+	matrix::Vector2f 			_input{0.0f, 0.0f};
+
+	gz::transport::Node::Publisher _actuators_pub;
+
+	// const std::string _model_name = "r1_rover_0";
+
 
 	/**
 	*

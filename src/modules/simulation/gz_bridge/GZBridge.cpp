@@ -128,6 +128,11 @@ int GZBridge::init()
 		}
 	}
 
+	// temporary perfrivik
+
+	std::string actuator_topic = "/model/" + _model_name + "/command/motor_speed";
+	_actuators_pub = _node.Advertise<gz::msgs::Actuators>(actuator_topic);
+
 	// clock
 	std::string clock_topic = "/world/" + _world_name + "/clock";
 
@@ -181,15 +186,17 @@ int GZBridge::init()
 		return PX4_ERROR;
 	}
 
-	if (!_mixing_interface_esc.init(_model_name)) {
-		PX4_ERR("failed to init ESC output");
-		return PX4_ERROR;
-	}
+	// perfrivik temporary
 
-	if (!_mixing_interface_servo.init(_model_name)) {
-		PX4_ERR("failed to init servo output");
-		return PX4_ERROR;
-	}
+	// if (!_mixing_interface_esc.init(_model_name)) {
+	// 	PX4_ERR("failed to init ESC output");
+	// 	return PX4_ERROR;
+	// }
+
+	// if (!_mixing_interface_servo.init(_model_name)) {
+	// 	PX4_ERR("failed to init servo output");
+	// 	return PX4_ERROR;
+	// }
 
 	ScheduleNow();
 	return OK;
@@ -702,14 +709,48 @@ void GZBridge::Run()
 
 		updateParams();
 
+
 		_mixing_interface_esc.updateParams();
 		_mixing_interface_servo.updateParams();
+	}
+
+	// temporary perfrivik
+
+	if(_differential_drive_control_sub.updated()){
+		directMotorSub();
+		directMotorPub();
 	}
 
 	ScheduleDelayed(10_ms);
 
 	pthread_mutex_unlock(&_node_mutex);
 }
+
+void GZBridge::directMotorSub()
+{
+	_differential_drive_control_sub.copy(&_diff_drive_control);
+
+	_input(0) = _diff_drive_control.motor_control[0];
+	_input(1) = _diff_drive_control.motor_control[1];
+}
+
+void GZBridge::directMotorPub()
+{
+
+	gz::msgs::Actuators motor_velocity_message;
+	motor_velocity_message.mutable_velocity()->Resize(2, 0);
+
+	for (unsigned i = 0; i < 2; i++) {
+		motor_velocity_message.set_velocity(i, _input(i));
+	}
+
+	if (_actuators_pub.Valid()) {
+		_actuators_pub.Publish(motor_velocity_message);
+	}
+
+}
+
+
 
 int GZBridge::print_status()
 {
