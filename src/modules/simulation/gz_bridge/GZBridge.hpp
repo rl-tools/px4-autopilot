@@ -60,6 +60,8 @@
 // perfrivik temporary
 
 #include <uORB/topics/differential_drive_control.h>
+#include <uORB/topics/wheel_encoders.h>
+#include <gz/msgs/model.pb.h>
 
 #include <gz/math.hh>
 #include <gz/msgs.hh>
@@ -113,6 +115,7 @@ private:
 
 	void directMotorSub();
 	void directMotorPub();
+	void encoderCallback(const gz::msgs::Model &model);
 
 	uORB::Subscription _differential_drive_control_sub{ORB_ID(differential_drive_control)};
 
@@ -122,7 +125,20 @@ private:
 
 	gz::transport::Node::Publisher _actuators_pub;
 
-	// const std::string _model_name = "r1_rover_0";
+
+
+	uORB::PublicationMulti<wheel_encoders_s> _wheelEncodersAdv[4] { ORB_ID(wheel_encoders), ORB_ID(wheel_encoders), ORB_ID(wheel_encoders), ORB_ID(wheel_encoders)};
+
+	// gz::transport::Node::Subscriber _encoder_sub;
+
+	wheel_encoders_s 			_wheelEncoderMsg[4];
+
+	uint32_t _lastEncoderCount[4] {0, 0, 0, 0};
+	int64_t _encoderCounts[4] {0, 0, 0, 0};
+	int32_t _motorSpeeds[4] {0, 0, 0, 0};
+
+	void encoderCallback();
+	void encoderDataPub();
 
 
 	/**

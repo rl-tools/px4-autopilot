@@ -133,6 +133,16 @@ int GZBridge::init()
 	std::string actuator_topic = "/model/" + _model_name + "/command/motor_speed";
 	_actuators_pub = _node.Advertise<gz::msgs::Actuators>(actuator_topic);
 
+	// encoder data temporary
+	std::string encoder_topic = "/world/" + _world_name + "/model/" + _model_name + "/joint_state";
+
+	PX4_ERR("Encoder topic %s",  encoder_topic.c_str());
+
+	if (!_node.Subscribe(encoder_topic, &GZBridge::encoderCallback, this)) {
+		PX4_ERR("failed to subscribe to %s", encoder_topic.c_str());
+		return PX4_ERROR;
+	}
+
 	// clock
 	std::string clock_topic = "/world/" + _world_name + "/clock";
 
@@ -353,6 +363,26 @@ void GZBridge::clockCallback(const gz::msgs::Clock &clock)
 
 	pthread_mutex_unlock(&_node_mutex);
 }
+
+void GZBridge::encoderCallback(const gz::msgs::Model &model)
+{
+	pthread_mutex_lock(&_node_mutex);
+
+	for(int i = 0; i < 4; i++ ){
+		auto joint = model.joint(i);
+		_encoderCounts[i] = joint.axis1().position();
+		_motorSpeeds[i] = joint.axis1().velocity();
+	}
+
+	// PX4_ERR("Testing: %f and %f", (double)_encoderCounts[0], (double)_motorSpeeds[0] );
+
+	encoderDataPub();
+
+	pthread_mutex_unlock(&_node_mutex);
+}
+
+
+
 
 void GZBridge::barometerCallback(const gz::msgs::FluidPressure &air_pressure)
 {
@@ -719,11 +749,32 @@ void GZBridge::Run()
 	if(_differential_drive_control_sub.updated()){
 		directMotorSub();
 		directMotorPub();
+
+		// temporary, not sure how to do a callback depending on a gz topic
+		// encoderDatasub();
+		// encoderDataPub();
 	}
+
+
 
 	ScheduleDelayed(10_ms);
 
 	pthread_mutex_unlock(&_node_mutex);
+}
+
+void GZBridge::encoderDataPub()
+{
+	// temporary, change this hardcoded encoder size
+
+	for (int i = 0; i < 4; i++) {
+		_wheelEncoderMsg[i].timestamp = hrt_absolute_time();
+
+		_wheelEncoderMsg[i].encoder_position = _encoderCounts[i];
+		_wheelEncoderMsg[i].speed = _motorSpeeds[i];
+
+		_wheelEncodersAdv[i].publish(_wheelEncoderMsg[i]);
+	}
+
 }
 
 void GZBridge::directMotorSub()

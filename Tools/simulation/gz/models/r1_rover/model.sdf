@@ -516,6 +516,14 @@
 	    </axis>
 	  </joint>
 	  <static>0</static>
+	  <plugin
+	  filename="gz-sim-joint-state-publisher-system"
+	  name="gz::sim::systems::JointStatePublisher">
+	  	<joint_name>motor_0</joint_name>
+		<joint_name>motor_1</joint_name>
+		<joint_name>motor_2</joint_name>
+		<joint_name>motor_3</joint_name>
+ 	  </plugin>
 
 	  <!-- <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
 		<left_joint>servo_0</left_joint>
