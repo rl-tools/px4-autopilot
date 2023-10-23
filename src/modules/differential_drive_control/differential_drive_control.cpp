@@ -85,6 +85,9 @@ void DifferentialDriveControl::Run()
 	}
 
 	vehicle_control_mode_poll();
+	position_setpoint_triplet_poll();
+	vehicle_position_poll();
+	vehicle_attitude_poll();
 
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
@@ -138,8 +141,7 @@ void DifferentialDriveControl::Run()
 }
 
 //temporary
-void
-DifferentialDriveControl::publishAllocation()
+void DifferentialDriveControl::publishAllocation()
 {
 	vehicle_thrust_setpoint_s v_thrust_sp{};
 	v_thrust_sp.timestamp = hrt_absolute_time();
@@ -177,11 +179,37 @@ DifferentialDriveControl::publishAllocation()
 //         _outputs_pub.publish(_actuator_outputs);
 // }
 
-void
-DifferentialDriveControl::vehicle_control_mode_poll()
+void DifferentialDriveControl::vehicle_control_mode_poll()
 {
 	if (_control_mode_sub.updated()) {
 		_control_mode_sub.copy(&_control_mode);
+	}
+}
+
+void DifferentialDriveControl::position_setpoint_triplet_poll()
+{
+	if (_pos_sp_triplet_sub.updated()) {
+		_pos_sp_triplet_sub.copy(&_pos_sp_triplet);
+	}
+}
+
+void DifferentialDriveControl::vehicle_position_poll()
+{
+	if(_global_pos_sub.updated()) {
+		_global_pos_sub.copy(&_global_pos);
+	}
+
+
+	if(_local_pos_sub.updated()) {
+		_local_pos_sub.copy(&_local_pos);
+	}
+
+}
+
+void DifferentialDriveControl::vehicle_attitude_poll()
+{
+	if (_att_sub.updated()) {
+		_att_sub.copy(&_vehicle_att);
 	}
 }
 
@@ -197,9 +225,52 @@ void DifferentialDriveControl::subscribeManualControl()
 
 void DifferentialDriveControl::subscribeAutoControl()
 {
-	PX4_ERR("TO DO: Write Auto Control Logic");
-	return;
+
+	_global_position(0) = _global_pos.lat;
+	_global_position(1) = _global_pos.lon;
+
+	_current_waypoint(0) = _pos_sp_triplet.current.lat;
+	_current_waypoint(1) = _pos_sp_triplet.current.lon;
+
+	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
+
+	// calculate bearing
+	float desired_heading = computeBearing(_global_position, _current_waypoint);
+
+	// float distance_to_next_wp = get_distance_to_next_waypoint(_global_position(0), _global_position(1),
+	// 							  _current_waypoint(0), _current_waypoint(1));
+
+	float heading_error = normalizeAngle(desired_heading - vehicle_yaw);
+
+	float desired_angular_rate = heading_error*2;
+
+	// float desired_linear_speed = computeDesiredSpeed(distance_to_next_wp);
+	float desired_linear_speed = 50;
+
+	_input_feed_forward(0) = desired_linear_speed;
+
+	_input_feed_forward(1) = desired_angular_rate;
 }
+
+float DifferentialDriveControl::computeDesiredSpeed(float distance) {
+        // You may want to tune these parameters
+        float max_speed = 1.0;  // Max linear speed
+        float speed_scaling_factor = 1.0;  // How quickly the speed decreases with distance
+        return max_speed * std::exp(-speed_scaling_factor * distance);
+}
+
+float DifferentialDriveControl::computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint) {
+        float delta_x = waypoint(0) - current_pos(0);
+        float delta_y = waypoint(1) - current_pos(1);
+        return std::atan2(delta_y, delta_x);
+}
+
+float DifferentialDriveControl::normalizeAngle(float angle) {
+	// wtf, i hope no one sees this for now lol
+        while (angle > (float)M_PI) angle -= (float)2.0 * (float)M_PI;
+        while (angle < -(float)M_PI) angle += (float)2.0 * (float)M_PI;
+        return angle;
+    }
 
 void DifferentialDriveControl::publishRateControl()
 {

@@ -50,7 +50,13 @@
 #include <uORB/topics/vehicle_thrust_setpoint.h>
 #include <uORB/topics/vehicle_torque_setpoint.h>
 
+#include <uORB/topics/vehicle_global_position.h>
+#include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/vehicle_attitude.h>
 
+#include <lib/geo/geo.h>
+
+#include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/differential_drive_control.h>
@@ -94,6 +100,13 @@ private:
 	void subscribeAutoControl();
 	void vehicle_control_mode_poll();
 	void setAndPublishActuatorOutputs();
+	void position_setpoint_triplet_poll();
+	void vehicle_position_poll();
+	void vehicle_attitude_poll();
+
+	float computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint);
+	float normalizeAngle(float angle);
+	float computeDesiredSpeed(float distance);
 
 	// temporary
 
@@ -104,7 +117,7 @@ private:
 	uORB::Publication<differential_drive_control_s> _differential_drive_control_pub{ORB_ID(differential_drive_control)};
 	uORB::PublicationMulti<actuator_outputs_s> _outputs_pub{ORB_ID(actuator_outputs)};
 
-	// temporary 
+	// temporary
 
 	uORB::Publication<vehicle_thrust_setpoint_s>	_vehicle_thrust_setpoint_pub{ORB_ID(vehicle_thrust_setpoint)};
 	uORB::Publication<vehicle_torque_setpoint_s>	_vehicle_torque_setpoint_pub{ORB_ID(vehicle_torque_setpoint)};
@@ -115,17 +128,30 @@ private:
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
 	uORB::Subscription _manual_control_setpoint_sub{ORB_ID(manual_control_setpoint)};
 	uORB::Subscription _control_mode_sub{ORB_ID(vehicle_control_mode)};
+	uORB::Subscription _pos_sp_triplet_sub{ORB_ID(position_setpoint_triplet)};
+	uORB::Subscription _global_pos_sub{ORB_ID(vehicle_global_position)};
+	uORB::Subscription _local_pos_sub{ORB_ID(vehicle_local_position)};
+	uORB::Subscription _att_sub{ORB_ID(vehicle_attitude)};
 
 	differential_drive_control_s 		_diff_drive_control{};
 	manual_control_setpoint_s		_manual_control_setpoint{};
 	vehicle_control_mode_s			_control_mode{};
 	actuator_outputs_s 			_actuator_outputs{};
+	position_setpoint_triplet_s 		_pos_sp_triplet{};
+	vehicle_global_position_s		_global_pos{};			/**< global vehicle position */
+	vehicle_local_position_s		_local_pos{};			/**< global vehicle position */
+	vehicle_attitude_s			_vehicle_att{};
 
 	differential_drive_control_kinematics _controller;
 
 	matrix::Vector2f _input_pid{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
 	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
 	matrix::Vector2f _output{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
+
+	matrix::Vector2f _global_position{0.0, 0.0};
+	matrix::Vector2f _local_position{0.0, 0.0};
+	matrix::Vector2f _current_waypoint{0.0, 0.0};
+	double _theta{0.0};
 
 	uint8_t _arming_state{0};
 	bool _system_calibrating{false};
