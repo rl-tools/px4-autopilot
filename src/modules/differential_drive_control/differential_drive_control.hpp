@@ -34,6 +34,7 @@
 #pragma once
 
 #include "differential_drive_control_kinematics.hpp"
+#include "differential_drive_control_pid.hpp"
 
 #include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/defines.h>
@@ -103,6 +104,7 @@ private:
 	void position_setpoint_triplet_poll();
 	void vehicle_position_poll();
 	void vehicle_attitude_poll();
+	float getDt();
 
 	float computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint);
 	float normalizeAngle(float angle);
@@ -143,6 +145,7 @@ private:
 	vehicle_attitude_s			_vehicle_att{};
 
 	differential_drive_control_kinematics _controller;
+	differential_drive_control_pid _yaw_rate_pid;
 
 	matrix::Vector2f _input_pid{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
 	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
@@ -152,6 +155,10 @@ private:
 	matrix::Vector2f _local_position{0.0, 0.0};
 	matrix::Vector2f _current_waypoint{0.0, 0.0};
 	double _theta{0.0};
+
+	float _dt{0.0};
+	float _last_timestamp{0.0};
+	float _current_timestamp{0.0};
 
 	uint8_t _arming_state{0};
 	bool _system_calibrating{false};

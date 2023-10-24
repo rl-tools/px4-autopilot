@@ -31,30 +31,39 @@
  *
  ****************************************************************************/
 
-/**
- * Wheel Base (Distance from wheel to wheel)
- *
- * This enables continuous calibration of the magnetometers
- * before takeoff using gyro data.
- *
- * @boolean
- * @reboot_required true
- * @group Differential Drive Control
- */
-PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 1.f);
+#pragma once
 
-/**
- * Wheel Radius
- *
- * Increase to make the estimator more responsive
- * Decrease to make the estimator more robust to noise
- *
- * @min 0.1
- * @max 100
- * @increment 0.1
- * @decimal 1
- * @group Differential Drive Control
- */
-PARAM_DEFINE_FLOAT(DDC_WHEEL_RADIUS, 1.f);
+#include <px4_platform_common/module.h>
+#include <px4_platform_common/module_params.h>
 
+#include <matrix/matrix/math.hpp>
+
+class differential_drive_control_pid : public ModuleParams
+{
+
+public:
+	differential_drive_control_pid() : ModuleParams(this) {};
+	~differential_drive_control_pid() = default;
+
+	float pid(float reference, float actual, float dt, float windup, bool normalized);
+
+private:
+
+	float _reference{0.0};
+	float _actual{0.0};
+
+	float _p_error{0.0};
+	float _i_error{0.0};
+	float _d_error{0.0};
+	float _previous_error{0.0};
+
+	float _antireset_windup{0.0};
+
+	float _kp{2.0};
+	float _ki{0.8};
+	float _kd{0.5};
+
+	float _dt{1.0};
+
+};
 

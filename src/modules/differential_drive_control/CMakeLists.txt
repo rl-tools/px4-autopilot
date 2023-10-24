@@ -42,6 +42,10 @@ px4_add_module(
 		differential_drive_control_kinematics.hpp
 		differential_drive_control_guidance.cpp
 		differential_drive_control_guidance.hpp
+		differential_drive_control_guidance.cpp
+		differential_drive_control_guidance.hpp
+		differential_drive_control_pid.cpp
+		differential_drive_control_pid.hpp
 	DEPENDS
 		px4_work_queue
 )

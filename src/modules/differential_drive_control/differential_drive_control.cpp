@@ -44,7 +44,7 @@ DifferentialDriveControl::DifferentialDriveControl() :
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::lp_default)
 {
 	_differential_drive_control_pub.advertise();
-
+	_last_timestamp = hrt_absolute_time();
 	// temporary
 	// _actuators_pub = _node.Advertise<gz::msgs::Twist>("/model/r1_rover_0/cmd_vel");
 }
@@ -83,6 +83,8 @@ void DifferentialDriveControl::Run()
 		ScheduleClear();
 		exit_and_cleanup();
 	}
+
+	_current_timestamp = hrt_absolute_time();
 
 	vehicle_control_mode_poll();
 	position_setpoint_triplet_poll();
@@ -137,6 +139,8 @@ void DifferentialDriveControl::Run()
 	// publishAllocation();
 
 	// setAndPublishActuatorOutputs();
+
+	_last_timestamp = _current_timestamp;
 
 }
 
@@ -242,7 +246,9 @@ void DifferentialDriveControl::subscribeAutoControl()
 
 	float heading_error = normalizeAngle(desired_heading - vehicle_yaw);
 
-	float desired_angular_rate = heading_error*2;
+	_dt = getDt();
+
+	float desired_angular_rate = _yaw_rate_pid.pid(heading_error, 0, _dt, 0, true);
 
 	// float desired_linear_speed = computeDesiredSpeed(distance_to_next_wp);
 	float desired_linear_speed = 50;
@@ -250,6 +256,12 @@ void DifferentialDriveControl::subscribeAutoControl()
 	_input_feed_forward(0) = desired_linear_speed;
 
 	_input_feed_forward(1) = desired_angular_rate;
+}
+
+float DifferentialDriveControl::getDt()
+{
+
+	return ((_current_timestamp - _last_timestamp)*1000000);
 }
 
 float DifferentialDriveControl::computeDesiredSpeed(float distance) {
@@ -270,7 +282,7 @@ float DifferentialDriveControl::normalizeAngle(float angle) {
         while (angle > (float)M_PI) angle -= (float)2.0 * (float)M_PI;
         while (angle < -(float)M_PI) angle += (float)2.0 * (float)M_PI;
         return angle;
-    }
+}
 
 void DifferentialDriveControl::publishRateControl()
 {
