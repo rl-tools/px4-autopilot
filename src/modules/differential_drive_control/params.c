@@ -41,7 +41,7 @@
  * @reboot_required true
  * @group Differential Drive Control
  */
-PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 1.f);
+PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 0.54f);
 
 /**
  * Wheel Radius
@@ -49,12 +49,12 @@ PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 1.f);
  * Increase to make the estimator more responsive
  * Decrease to make the estimator more robust to noise
  *
- * @min 0.1
+ * @min 0.0
  * @max 100
- * @increment 0.1
- * @decimal 1
+ * @increment 0.001
+ * @decimal 5
  * @group Differential Drive Control
  */
-PARAM_DEFINE_FLOAT(DDC_WHEEL_RADIUS, 1.f);
+PARAM_DEFINE_FLOAT(DDC_WHEEL_RADIUS, 0.0686f);
 
 

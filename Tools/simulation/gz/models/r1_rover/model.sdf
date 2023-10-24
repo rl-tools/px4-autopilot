@@ -39,10 +39,12 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
+		<!-- <script>
 		  <name>Gazebo/Grey</name>
 		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		</script> -->
+		<diffuse>0.2 0.4 0.9</diffuse>
+		<specular>0.2 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__top_link_visual_1'>
@@ -54,10 +56,12 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
+		<!-- <script>
 		  <name>Gazebo/White</name>
 		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		</script> -->
+		<diffuse>0.2 0.4 0.9</diffuse>
+		<specular>0.2 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__battery_link_visual_2'>
@@ -69,10 +73,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.2 0.4 0.9</diffuse>
+		<specular>0.2 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__housing_link_visual_3'>
@@ -84,10 +86,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.2 0.4 0.9</diffuse>
+		<specular>0.2 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__l_antenna_link_visual_4'>
@@ -99,10 +99,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.2 0.4 0.9</diffuse>
+		<specular>0.2 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__r_antenna_link_visual_5'>
@@ -114,10 +112,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.2 0.4 0.9</diffuse>
+		<specular>0.2 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <velocity_decay/>
@@ -205,10 +201,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.8 0.4 0.9</diffuse>
+		<specular>0.8 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <gravity>1</gravity>
@@ -320,10 +314,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.8 0.4 0.9</diffuse>
+		<specular>0.8 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <gravity>1</gravity>
@@ -404,10 +396,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.8 0.4 0.9</diffuse>
+		<specular>0.8 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <gravity>1</gravity>
@@ -490,10 +480,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<script>
-		  <name>Gazebo/FlatBlack</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script>
+		<diffuse>0.8 0.4 0.9</diffuse>
+		<specular>0.8 0.4 0.9</specular>
 	      </material>
 	    </visual>
 	    <gravity>1</gravity>

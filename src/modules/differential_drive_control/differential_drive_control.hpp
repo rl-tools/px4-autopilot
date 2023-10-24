@@ -56,6 +56,7 @@
 #include <uORB/topics/vehicle_attitude.h>
 
 #include <lib/geo/geo.h>
+#include <math.h>
 
 #include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/manual_control_setpoint.h>
@@ -107,7 +108,9 @@ private:
 	float getDt();
 
 	float computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint);
+	float computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
 	float normalizeAngle(float angle);
+	float computeAlignment(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
 	float computeDesiredSpeed(float distance);
 
 	// temporary
@@ -145,7 +148,9 @@ private:
 	vehicle_attitude_s			_vehicle_att{};
 
 	differential_drive_control_kinematics _controller;
-	differential_drive_control_pid _yaw_rate_pid;
+	differential_drive_control_pid _yaw_rate_point_pid;
+	differential_drive_control_pid _yaw_rate_align_pid;
+	differential_drive_control_pid _speed_control_pid;
 
 	matrix::Vector2f _input_pid{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
 	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
@@ -154,6 +159,8 @@ private:
 	matrix::Vector2f _global_position{0.0, 0.0};
 	matrix::Vector2f _local_position{0.0, 0.0};
 	matrix::Vector2f _current_waypoint{0.0, 0.0};
+	matrix::Vector2f _previous_waypoint{0.0, 0.0};
+
 	double _theta{0.0};
 
 	float _dt{0.0};
