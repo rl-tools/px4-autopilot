@@ -90,6 +90,7 @@ void DifferentialDriveControl::Run()
 	position_setpoint_triplet_poll();
 	vehicle_position_poll();
 	vehicle_attitude_poll();
+	getLocalVelocity();
 
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
@@ -227,11 +228,24 @@ void DifferentialDriveControl::subscribeManualControl()
 	// PX4_ERR("My control inputs direcly are %f and %f", (double)_input_feed_forward(0), (double)_input_feed_forward(1));
 }
 
+void DifferentialDriveControl::getLocalVelocity()
+{
+	Vector2f velocity_vector{0.0, 0.0};
+
+	velocity_vector(0) = _local_pos.vx;
+	velocity_vector(1) = _local_pos.vy;
+
+	_forwards_velocity = velocity_vector.norm();
+}
+
 void DifferentialDriveControl::subscribeAutoControl()
 {
 
 	_global_position(0) = _global_pos.lat;
 	_global_position(1) = _global_pos.lon;
+
+	_next_waypoint(0) = _pos_sp_triplet.next.lat;
+	_next_waypoint(1) = _pos_sp_triplet.next.lon;
 
 	_current_waypoint(0) = _pos_sp_triplet.current.lat;
 	_current_waypoint(1) = _pos_sp_triplet.current.lon;
@@ -245,8 +259,8 @@ void DifferentialDriveControl::subscribeAutoControl()
 	// float desired_heading = computeBearing(_global_position, _current_waypoint);
 	float desired_heading = computeAdvancedBearing(_global_position, _current_waypoint, _previous_waypoint);
 
-	// float distance_to_next_wp = get_distance_to_next_waypoint(_global_position(0), _global_position(1),
-	// 							  _current_waypoint(0), _current_waypoint(1));
+	float distance_to_next_wp = get_distance_to_next_waypoint(_global_position(0), _global_position(1),
+								  _current_waypoint(0), _current_waypoint(1));
 
 	float heading_error = normalizeAngle(desired_heading - vehicle_yaw);
 	// float heading_error = 0;
@@ -260,15 +274,91 @@ void DifferentialDriveControl::subscribeAutoControl()
 
 	_dt = getDt();
 
-	float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, true, 2, 0.5, 0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, true, 1, 0.4, 0);
+	float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, true, 2, 0.4, 0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, true, 1, 0.2, 0);
 
 	// float desired_linear_speed = computeDesiredSpeed(distance_to_next_wp);
-	float desired_linear_speed = 2;
+	float desired_linear_velocity = 2;
 
-	_input_feed_forward(0) = desired_linear_speed;
+
+
+	// temporary ///////////////////////////////////////////////////////////////////////////////////////////////
+
+	// PositionSmoothing::PositionSmoothingSetpoints smoothed_setpoints;
+	// matrix::Vector3f _velocity_setpoint = {2.0, 0.0, 0.0};
+	// matrix::Vector3f _previous_waypoint_t = {0.0, 0.0, 0.0};
+	// matrix::Vector3f _current_waypoint_t = {0.0, 0.0, 0.0};
+	// matrix::Vector3f _next_waypoint_t = {0.0, 0.0, 0.0};
+	// matrix::Vector3f _global_position_t = {0.0, 0.0, 0.0};
+
+	// _previous_waypoint_t(0) = _previous_waypoint(0);
+	// _previous_waypoint_t(1) = _previous_waypoint(1);
+
+	// _current_waypoint_t(0) = _current_waypoint(0);
+	// _current_waypoint_t(1) = _current_waypoint(1);
+
+	// _next_waypoint_t(0) = _next_waypoint(0);
+	// _next_waypoint_t(1) = _next_waypoint(1);
+
+	// _global_position_t(0) = _global_position(0);
+	// _global_position_t(1) = _global_position(1);
+
+	// Vector3f waypoints[] = {_previous_waypoint_t, _current_waypoint_t, _next_waypoint_t};
+
+
+	// _position_smoothing.generateSetpoints(
+	// 	_global_position_t,
+	// 	waypoints,
+	// 	_velocity_setpoint,
+	// 	_dt,
+	// 	false,
+	// 	smoothed_setpoints
+	// );
+
+	// PX4_ERR("smoothed velocity x: %f, y: %f, z: %f", (double)smoothed_setpoints.velocity(0), (double)smoothed_setpoints.velocity(1), (double)smoothed_setpoints.velocity(2));
+
+
+	// _velocity_smoothing_x.updateDurations(_velocity_setpoint(0));
+
+
+	// VelocitySmoothing::timeSynchronization(_velocity_smoothing_x, 3);
+
+	// float test_setpint = _velocity_smoothing_x.getVelSp();
+
+	// PX4_ERR("Test sp: %f", (double)test_setpint);
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//// new temporary ////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+	_forwards_velocity_smoothing.setMaxJerk(22);
+	_forwards_velocity_smoothing.setMaxAccel(2);
+	_forwards_velocity_smoothing.setMaxVel(4);
+
+	// const float velocity_error_sign = matrix::sign(velocity_error);
+	const float max_velocity = math::trajectory::computeMaxSpeedFromDistance(22, 1, distance_to_next_wp, 0.0f);
+
+	_forwards_velocity_smoothing.updateDurations(max_velocity);
+
+	_forwards_velocity_smoothing.updateTraj(_dt);
+
+	desired_linear_velocity = _forwards_velocity_smoothing.getCurrentVelocity();
+
+	PX4_ERR("Test linear vel sp and real: %f %f", (double)desired_linear_velocity, (double)_forwards_velocity);
+
+
+
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	_input_feed_forward(0) = desired_linear_velocity;
 
 	_input_feed_forward(1) = desired_angular_rate;
 }
+
+
 
 float DifferentialDriveControl::getDt()
 {
@@ -328,7 +418,7 @@ float DifferentialDriveControl::computeAdvancedBearing(const matrix::Vector2f& c
 
 	matrix::Vector2f v1 = current_pos - p1;
 
-	matrix::Vector2f new_waypoint = -v1*20 + waypoint;
+	matrix::Vector2f new_waypoint = -v1*10 + waypoint;
 
 	return computeBearing(current_pos, new_waypoint);
 }

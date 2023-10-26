@@ -58,6 +58,9 @@
 #include <lib/geo/geo.h>
 #include <math.h>
 
+#include <lib/motion_planning/PositionSmoothing.hpp>
+#include <lib/motion_planning/VelocitySmoothing.hpp>
+
 #include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/parameter_update.h>
@@ -106,6 +109,7 @@ private:
 	void vehicle_position_poll();
 	void vehicle_attitude_poll();
 	float getDt();
+	void getLocalVelocity();
 
 	float computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint);
 	float computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
@@ -147,19 +151,24 @@ private:
 	vehicle_local_position_s		_local_pos{};			/**< global vehicle position */
 	vehicle_attitude_s			_vehicle_att{};
 
-	differential_drive_control_kinematics _controller;
-	differential_drive_control_pid _yaw_rate_point_pid;
-	differential_drive_control_pid _yaw_rate_align_pid;
-	differential_drive_control_pid _speed_control_pid;
+	differential_drive_control_kinematics 	_controller;
+	differential_drive_control_pid 		_yaw_rate_point_pid;
+	differential_drive_control_pid 		_yaw_rate_align_pid;
+	differential_drive_control_pid 		_speed_control_pid;
 
 	matrix::Vector2f _input_pid{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
 	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
 	matrix::Vector2f _output{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
+	float _forwards_velocity{0.0f};
 
 	matrix::Vector2f _global_position{0.0, 0.0};
 	matrix::Vector2f _local_position{0.0, 0.0};
 	matrix::Vector2f _current_waypoint{0.0, 0.0};
 	matrix::Vector2f _previous_waypoint{0.0, 0.0};
+	matrix::Vector2f _next_waypoint{0.0, 0.0};
+
+	VelocitySmoothing _forwards_velocity_smoothing;
+	PositionSmoothing _position_smoothing;
 
 	double _theta{0.0};
 
