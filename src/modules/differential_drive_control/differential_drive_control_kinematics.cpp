@@ -25,8 +25,8 @@ void differential_drive_control_kinematics::computeInverseKinematics()
 	_motor_vel_right = _linear_vel_x/r + l/2 * _yaw_rate/r;
 	_motor_vel_left = _linear_vel_x/r - l/2 * _yaw_rate/r;
 
-	_output(0) = _motor_vel_right;
-	_output(1) = _motor_vel_left;
+	_output_inverse(0) = _motor_vel_right;
+	_output_inverse(1) = _motor_vel_left;
 }
 
 void differential_drive_control_kinematics::computeForwardsKinematics()
@@ -37,13 +37,18 @@ void differential_drive_control_kinematics::computeForwardsKinematics()
 	_linear_vel_x = r/2*(_motor_vel_right + _motor_vel_left);
 	_yaw_rate = r/l*(_motor_vel_right - _motor_vel_left);
 
-	_output(0) = _linear_vel_x;
-	_output(1) = _yaw_rate;
+	_output_forwards(0) = _linear_vel_x;
+	_output_forwards(1) = _yaw_rate;
 }
 
-matrix::Vector2f differential_drive_control_kinematics::getOutput() const
+matrix::Vector2f differential_drive_control_kinematics::getOutput(bool inverse) const
 {
-	return _output;
+	if(inverse){
+		return _output_inverse;
+	} else {
+		return _output_forwards;
+	}
+
 }
 
 float differential_drive_control_kinematics::pid()

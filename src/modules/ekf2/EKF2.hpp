@@ -93,6 +93,7 @@
 
 #if defined(CONFIG_EKF2_AUXVEL)
 # include <uORB/topics/landing_target_pose.h>
+# include <uORB/topics/differential_drive_control.h>
 #endif // CONFIG_EKF2_AUXVEL
 
 #if defined(CONFIG_EKF2_BAROMETER)
@@ -338,6 +339,7 @@ private:
 
 #if defined(CONFIG_EKF2_AUXVEL)
 	uORB::Subscription _landing_target_pose_sub {ORB_ID(landing_target_pose)};
+	uORB::Subscription _differential_drive_control {ORB_ID(differential_drive_control)};
 
 	uORB::PublicationMulti<estimator_aid_source2d_s> _estimator_aid_src_aux_vel_pub{ORB_ID(estimator_aid_src_aux_vel)};
 	hrt_abstime _status_aux_vel_pub_last{0};

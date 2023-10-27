@@ -45,8 +45,6 @@ DifferentialDriveControl::DifferentialDriveControl() :
 {
 	_differential_drive_control_pub.advertise();
 	_last_timestamp = hrt_absolute_time();
-	// temporary
-	// _actuators_pub = _node.Advertise<gz::msgs::Twist>("/model/r1_rover_0/cmd_vel");
 }
 
 DifferentialDriveControl::~DifferentialDriveControl()
@@ -91,6 +89,7 @@ void DifferentialDriveControl::Run()
 	vehicle_position_poll();
 	vehicle_attitude_poll();
 	getLocalVelocity();
+	encoder_data_poll();
 
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
@@ -130,59 +129,55 @@ void DifferentialDriveControl::Run()
 		_input_feed_forward = {0.0f, 0.0f};
 	}
 
+	/////// Fix this section, does not work well with the inverse bool
 	_controller.setInput(_input_feed_forward + _input_pid, true);
 
-	_output = _controller.getOutput();
+	_output_inverse = _controller.getOutput(true);
 
 	publishRateControl();
 
-	// temporary
-	// publishAllocation();
-
-	// setAndPublishActuatorOutputs();
+	//////////////////////////////////////////////////////////////////
 
 	_last_timestamp = _current_timestamp;
 
 }
 
-//temporary
-void DifferentialDriveControl::publishAllocation()
+void DifferentialDriveControl::encoder_data_poll()
 {
-	vehicle_thrust_setpoint_s v_thrust_sp{};
-	v_thrust_sp.timestamp = hrt_absolute_time();
-	v_thrust_sp.xyz[0] = _manual_control_setpoint.throttle;
-	v_thrust_sp.xyz[1] = 0.0f;
-	v_thrust_sp.xyz[2] = 0.0f;
-	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
+	// TODO Add parameters that asks how many wheels there are.
 
-	vehicle_torque_setpoint_s v_torque_sp{};
-	v_torque_sp.timestamp = hrt_absolute_time();
-	v_torque_sp.xyz[0] = 0.f;
-	v_torque_sp.xyz[1] = 0.f;
-	v_torque_sp.xyz[2] = _manual_control_setpoint.roll;
-	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
+	float sum_left_encoders_speed = 0.0f;
+	float sum_right_encoders_speed = 0.0f;
+	int count_left_encoders = 0;
+	int count_right_encoders = 0;
+
+	for (int i = 0; i < _wheel_encoders_sub.size(); ++i) {
+		auto &sub = _wheel_encoders_sub[i];
+		if (sub.update(&_wheel_encoder)) {
+		if (i < 2) {  // Assuming first two encoders are for the right side
+			sum_right_encoders_speed += _wheel_encoder.speed;
+			count_right_encoders++;
+		} else {  // Assuming the last two encoders are for the left side
+			sum_left_encoders_speed += _wheel_encoder.speed;
+			count_left_encoders++;
+		}
+		}
+	}
+
+	if (count_right_encoders > 0 && count_left_encoders > 0) {
+		_encoder_data(0) = sum_right_encoders_speed / count_right_encoders;
+		_encoder_data(1) = sum_left_encoders_speed / count_left_encoders;
+
+		_controller.setInput(_encoder_data, false);
+
+		_output_forwards = _controller.getOutput(false);
+
+	}
+	else {
+		PX4_ERR("No encoder data received.");
+	}
 }
 
-// void
-// DifferentialDriveControl::publish(double linear_x, double angular_z) {
-//     gz::msgs::Twist msg;
-
-//     msg.mutable_linear()->set_x(linear_x);
-//     msg.mutable_angular()->set_z(angular_z);
-
-//     _actuators_pub.Publish(msg);
-// }
-
-// void
-// DifferentialDriveControl::setAndPublishActuatorOutputs()
-// {
-//         _actuator_outputs.noutputs = 2;
-//         for (size_t i = 0; i < 2; ++i) {
-//                 _actuator_outputs.output[i] = _output(i);
-//         }
-//         _actuator_outputs.timestamp = hrt_absolute_time();
-//         _outputs_pub.publish(_actuator_outputs);
-// }
 
 void DifferentialDriveControl::vehicle_control_mode_poll()
 {
@@ -268,10 +263,6 @@ void DifferentialDriveControl::subscribeAutoControl()
 	float align_error = computeAlignment(_global_position, _current_waypoint, _previous_waypoint);
 	// float align_error = 0;
 
-	// PX4_ERR("Alighnment error: %f", (double)align_error);
-	// PX4_ERR("Heading error: %f", (double)heading_error);
-
-
 	_dt = getDt();
 
 	float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, true, 2, 0.4, 0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, true, 1, 0.2, 0);
@@ -279,58 +270,7 @@ void DifferentialDriveControl::subscribeAutoControl()
 	// float desired_linear_speed = computeDesiredSpeed(distance_to_next_wp);
 	float desired_linear_velocity = 2;
 
-
-
-	// temporary ///////////////////////////////////////////////////////////////////////////////////////////////
-
-	// PositionSmoothing::PositionSmoothingSetpoints smoothed_setpoints;
-	// matrix::Vector3f _velocity_setpoint = {2.0, 0.0, 0.0};
-	// matrix::Vector3f _previous_waypoint_t = {0.0, 0.0, 0.0};
-	// matrix::Vector3f _current_waypoint_t = {0.0, 0.0, 0.0};
-	// matrix::Vector3f _next_waypoint_t = {0.0, 0.0, 0.0};
-	// matrix::Vector3f _global_position_t = {0.0, 0.0, 0.0};
-
-	// _previous_waypoint_t(0) = _previous_waypoint(0);
-	// _previous_waypoint_t(1) = _previous_waypoint(1);
-
-	// _current_waypoint_t(0) = _current_waypoint(0);
-	// _current_waypoint_t(1) = _current_waypoint(1);
-
-	// _next_waypoint_t(0) = _next_waypoint(0);
-	// _next_waypoint_t(1) = _next_waypoint(1);
-
-	// _global_position_t(0) = _global_position(0);
-	// _global_position_t(1) = _global_position(1);
-
-	// Vector3f waypoints[] = {_previous_waypoint_t, _current_waypoint_t, _next_waypoint_t};
-
-
-	// _position_smoothing.generateSetpoints(
-	// 	_global_position_t,
-	// 	waypoints,
-	// 	_velocity_setpoint,
-	// 	_dt,
-	// 	false,
-	// 	smoothed_setpoints
-	// );
-
-	// PX4_ERR("smoothed velocity x: %f, y: %f, z: %f", (double)smoothed_setpoints.velocity(0), (double)smoothed_setpoints.velocity(1), (double)smoothed_setpoints.velocity(2));
-
-
-	// _velocity_smoothing_x.updateDurations(_velocity_setpoint(0));
-
-
-	// VelocitySmoothing::timeSynchronization(_velocity_smoothing_x, 3);
-
-	// float test_setpint = _velocity_smoothing_x.getVelSp();
-
-	// PX4_ERR("Test sp: %f", (double)test_setpint);
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//// new temporary ////////////////////////////////////////////////////////////////////////////////////////
-
-
+	//// Temporary //////////////////////////////////////////////////////////////////////////////////////////
 
 	_forwards_velocity_smoothing.setMaxJerk(22);
 	_forwards_velocity_smoothing.setMaxAccel(2);
@@ -345,11 +285,7 @@ void DifferentialDriveControl::subscribeAutoControl()
 
 	desired_linear_velocity = _forwards_velocity_smoothing.getCurrentVelocity();
 
-	PX4_ERR("Test linear vel sp and real: %f %f", (double)desired_linear_velocity, (double)_forwards_velocity);
-
-
-
-
+	// PX4_ERR("Test linear vel sp and real: %f %f", (double)desired_linear_velocity, (double)_forwards_velocity);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -358,7 +294,23 @@ void DifferentialDriveControl::subscribeAutoControl()
 	_input_feed_forward(1) = desired_angular_rate;
 }
 
+//temporary
+void DifferentialDriveControl::publishAllocation()
+{
+	vehicle_thrust_setpoint_s v_thrust_sp{};
+	v_thrust_sp.timestamp = hrt_absolute_time();
+	v_thrust_sp.xyz[0] = _manual_control_setpoint.throttle;
+	v_thrust_sp.xyz[1] = 0.0f;
+	v_thrust_sp.xyz[2] = 0.0f;
+	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
 
+	vehicle_torque_setpoint_s v_torque_sp{};
+	v_torque_sp.timestamp = hrt_absolute_time();
+	v_torque_sp.xyz[0] = 0.f;
+	v_torque_sp.xyz[1] = 0.f;
+	v_torque_sp.xyz[2] = _manual_control_setpoint.roll;
+	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
+}
 
 float DifferentialDriveControl::getDt()
 {
@@ -435,10 +387,11 @@ void DifferentialDriveControl::publishRateControl()
 	// magnetometer_bias_estimate_s mag_bias_est{};
 	differential_drive_control_s diff_drive_control{};
 
-	diff_drive_control.motor_control[0] = _output(0);
-	diff_drive_control.motor_control[1] = _output(1);
+	diff_drive_control.motor_control[0] = _output_inverse(0);
+	diff_drive_control.motor_control[1] = _output_inverse(1);
 
-
+	diff_drive_control.linear_velocity[0] = _output_forwards(0);
+	diff_drive_control.angular_velocity[2] = _output_forwards(1);
 
 	diff_drive_control.timestamp = hrt_absolute_time();
 
@@ -448,20 +401,6 @@ void DifferentialDriveControl::publishRateControl()
 
 int DifferentialDriveControl::print_status()
 {
-	// for (int mag_index = 0; mag_index < MAX_SENSOR_COUNT; mag_index++) {
-	// 	if (_calibration[mag_index].device_id() != 0) {
-
-	// 		_calibration[mag_index].PrintStatus();
-
-	// 		const Vector3f &bias = _bias_estimator[mag_index].getBias();
-
-	// 		PX4_INFO("%d (%" PRIu32 ") bias: [% 05.3f % 05.3f % 05.3f]",
-	// 			 mag_index, _calibration[mag_index].device_id(),
-	// 			 (double)bias(0),
-	// 			 (double)bias(1),
-	// 			 (double)bias(2));
-	// 	}
-	// }
 
 	return 0;
 }

@@ -70,6 +70,8 @@
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/Publication.hpp>
 #include <uORB/Subscription.hpp>
+#include <uORB/SubscriptionMultiArray.hpp>
+#include <uORB/topics/wheel_encoders.h>
 
 
 namespace differential_drive_control
@@ -108,6 +110,7 @@ private:
 	void position_setpoint_triplet_poll();
 	void vehicle_position_poll();
 	void vehicle_attitude_poll();
+	void encoder_data_poll();
 	float getDt();
 	void getLocalVelocity();
 
@@ -141,6 +144,8 @@ private:
 	uORB::Subscription _global_pos_sub{ORB_ID(vehicle_global_position)};
 	uORB::Subscription _local_pos_sub{ORB_ID(vehicle_local_position)};
 	uORB::Subscription _att_sub{ORB_ID(vehicle_attitude)};
+	// uORB::Subscription _encoder_data_sub{ORB_ID(wheel_encoders)};
+	uORB::SubscriptionMultiArray<wheel_encoders_s>	_wheel_encoders_sub{ORB_ID::wheel_encoders};
 
 	differential_drive_control_s 		_diff_drive_control{};
 	manual_control_setpoint_s		_manual_control_setpoint{};
@@ -150,6 +155,7 @@ private:
 	vehicle_global_position_s		_global_pos{};			/**< global vehicle position */
 	vehicle_local_position_s		_local_pos{};			/**< global vehicle position */
 	vehicle_attitude_s			_vehicle_att{};
+	wheel_encoders_s 			_wheel_encoder;
 
 	differential_drive_control_kinematics 	_controller;
 	differential_drive_control_pid 		_yaw_rate_point_pid;
@@ -158,7 +164,9 @@ private:
 
 	matrix::Vector2f _input_pid{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
 	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
-	matrix::Vector2f _output{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
+	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
+	matrix::Vector2f _output_forwards{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
+	matrix::Vector2f _encoder_data{0.0f, 0.0f};
 	float _forwards_velocity{0.0f};
 
 	matrix::Vector2f _global_position{0.0, 0.0};
