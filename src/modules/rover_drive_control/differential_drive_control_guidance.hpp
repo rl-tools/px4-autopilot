@@ -38,6 +38,11 @@
 
 #include <matrix/matrix/math.hpp>
 
+#include <lib/motion_planning/PositionSmoothing.hpp>
+#include <lib/motion_planning/VelocitySmoothing.hpp>
+
+#include "rover_drive_control_pid.hpp"
+
 
 
 class differential_drive_control_guidance : public ModuleParams
@@ -46,9 +51,11 @@ public:
 	differential_drive_control_guidance() : ModuleParams(this) {};
 	~differential_drive_control_guidance() = default;
 
-	void computeGuidance();
-
-
+	void 	computeGuidance();
+	float 	computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
+	float 	computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint);
+	float 	normalizeAngle(float angle);
+	float 	computeAlignment(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
 
 private:
 
@@ -56,15 +63,13 @@ private:
 	matrix::Vector2f _input{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
 	matrix::Vector2f _output{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 
-	float _linear_vel_x{0.0f};
-	float _yaw_rate{0.0f};
+	matrix::Vector2f _global_position{0.0, 0.0};
+	matrix::Vector2f _local_position{0.0, 0.0};
+	matrix::Vector2f _current_waypoint{0.0, 0.0};
+	matrix::Vector2f _previous_waypoint{0.0, 0.0};
+	matrix::Vector2f _next_waypoint{0.0, 0.0};
 
-	float _motor_vel_right{0.0f};
-	float _motor_vel_left{0.0f};
+	VelocitySmoothing _forwards_velocity_smoothing;
+	PositionSmoothing _position_smoothing;
 
-
-	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::DDC_WHEEL_BASE>) _param_ddc_wheel_base,
-		(ParamFloat<px4::params::DDC_WHEEL_RADIUS>) _param_ddc_wheel_radius
-	)
 };
