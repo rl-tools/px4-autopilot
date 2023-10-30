@@ -139,8 +139,8 @@ private:
 	vehicle_control_mode_s			_control_mode{};
 	actuator_outputs_s 			_actuator_outputs{};
 	position_setpoint_triplet_s 		_pos_sp_triplet{};
-	vehicle_global_position_s		_global_pos{};			/**< global vehicle position */
-	vehicle_local_position_s		_local_pos{};			/**< global vehicle position */
+	vehicle_global_position_s		_global_pos{};
+	vehicle_local_position_s		_local_pos{};
 	vehicle_attitude_s			_vehicle_att{};
 	wheel_encoders_s 			_wheel_encoder{};
 
@@ -174,6 +174,11 @@ private:
 
 	uint8_t _arming_state{0};
 	bool _system_calibrating{false};
+
+	DEFINE_PARAMETERS(
+		(ParamFloat<px4::params::RDC_MAX_FORW_VEL>) _param_rdc_max_forwards_velocity,
+		(ParamFloat<px4::params::RDC_MAX_ANG_VEL>) _param_rdc_max_angular_velocity
+	)
 
 };
 

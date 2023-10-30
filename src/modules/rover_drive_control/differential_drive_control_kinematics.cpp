@@ -19,8 +19,8 @@ void differential_drive_control_kinematics::setInput(const matrix::Vector2f& inp
 
 void differential_drive_control_kinematics::computeInverseKinematics()
 {
-	float r = _param_ddc_wheel_radius.get();
-	float l = _param_ddc_wheel_base.get();
+	float r = _param_rdc_wheel_radius.get();
+	float l = _param_rdc_wheel_base.get();
 
 	_motor_vel_right = _linear_vel_x/r + l/2 * _yaw_rate/r;
 	_motor_vel_left = _linear_vel_x/r - l/2 * _yaw_rate/r;
@@ -31,8 +31,8 @@ void differential_drive_control_kinematics::computeInverseKinematics()
 
 void differential_drive_control_kinematics::computeForwardsKinematics()
 {
-	float r = _param_ddc_wheel_radius.get();
-	float l = _param_ddc_wheel_base.get();
+	float r = _param_rdc_wheel_radius.get();
+	float l = _param_rdc_wheel_base.get();
 
 	_linear_vel_x = r/2*(_motor_vel_right + _motor_vel_left);
 	_yaw_rate = r/l*(_motor_vel_right - _motor_vel_left);

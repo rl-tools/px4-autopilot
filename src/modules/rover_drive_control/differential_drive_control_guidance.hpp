@@ -53,7 +53,7 @@ public:
 	differential_drive_control_guidance() : ModuleParams(this) {};
 	~differential_drive_control_guidance() = default;
 
-	matrix::Vector2f 	computeGuidance(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint, const matrix::Vector2f& next_waypoint, float vehicle_yaw, float dt);
+	matrix::Vector2f 	computeGuidance(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint, const matrix::Vector2f& next_waypoint, float vehicle_yaw, float dt, float max_forwards_velocity, float max_angular_velocity);
 	float 	computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
 	float 	computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint);
 	float 	normalizeAngle(float angle);

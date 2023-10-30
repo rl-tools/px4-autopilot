@@ -69,7 +69,7 @@ private:
 
 
 	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::DDC_WHEEL_BASE>) _param_ddc_wheel_base,
-		(ParamFloat<px4::params::DDC_WHEEL_RADIUS>) _param_ddc_wheel_radius
+		(ParamFloat<px4::params::RDC_WHEEL_BASE>) _param_rdc_wheel_base,
+		(ParamFloat<px4::params::RDC_WHEEL_RADIUS>) _param_rdc_wheel_radius
 	)
 };

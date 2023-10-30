@@ -41,7 +41,7 @@
  * @reboot_required true
  * @group Rover Drive Control
  */
-PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 0.54f);
+PARAM_DEFINE_FLOAT(RDC_WHEEL_BASE, 0.54f);
 
 /**
  * Wheel Radius
@@ -55,6 +55,33 @@ PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 0.54f);
  * @decimal 5
  * @group Rover Drive Control
  */
-PARAM_DEFINE_FLOAT(DDC_WHEEL_RADIUS, 0.0686f);
+PARAM_DEFINE_FLOAT(RDC_WHEEL_RADIUS, 0.0686f);
+
+/**
+ * Max Forwards Velocity
+ *
+ *
+ * @unit m/s
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 4.0f);
+
+/**
+ * Max Angular Velocity
+ *
+ *
+ * @unit m/s
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 1.0f);
+
 
 

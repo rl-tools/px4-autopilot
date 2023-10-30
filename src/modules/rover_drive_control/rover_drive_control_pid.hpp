@@ -37,6 +37,7 @@
 #include <px4_platform_common/module_params.h>
 
 #include <math.h>
+#include <lib/mathlib/mathlib.h>
 
 #include <matrix/matrix/math.hpp>
 
@@ -47,7 +48,7 @@ public:
 	rover_drive_control_pid() : ModuleParams(this) {};
 	~rover_drive_control_pid() = default;
 
-	float pid(float reference, float actual, float dt, float windup, bool normalized, float kp, float ki, float kd);
+	float pid(float reference, float actual, float dt, float windup, float saturation, bool normalized, float kp, float ki, float kd);
 
 private:
 
@@ -59,6 +60,7 @@ private:
 	float _i_error{0.0};
 	float _d_error{0.0};
 	float _previous_error{0.0};
+	float _previous_output{0.0};
 
 	float _antireset_windup{0.0};
 

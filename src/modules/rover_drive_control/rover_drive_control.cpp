@@ -140,8 +140,8 @@ void RoverDriveControl::subscribeManualControl()
 {
 	_manual_control_setpoint_sub.copy(&_manual_control_setpoint);
 
-	_input_feed_forward(0) = _manual_control_setpoint.throttle*100;
-	_input_feed_forward(1) = _manual_control_setpoint.roll*20;
+	_input_feed_forward(0) = _manual_control_setpoint.throttle*_param_rdc_max_forwards_velocity.get();
+	_input_feed_forward(1) = _manual_control_setpoint.roll*_param_rdc_max_angular_velocity.get();
 }
 
 void RoverDriveControl::subscribeAutoControl()
@@ -167,7 +167,7 @@ void RoverDriveControl::subscribeAutoControl()
 
 	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
 
-	matrix::Vector2f guidance_output = _differential_guidance_controller.computeGuidance(_global_position, _current_waypoint, _previous_waypoint, _next_waypoint, vehicle_yaw, _dt);
+	matrix::Vector2f guidance_output = _differential_guidance_controller.computeGuidance(_global_position, _current_waypoint, _previous_waypoint, _next_waypoint, vehicle_yaw, _dt, _param_rdc_max_forwards_velocity.get(), _param_rdc_max_angular_velocity.get());
 
 	_input_feed_forward(0) = guidance_output(0);
 	_input_feed_forward(1) = guidance_output(1);
