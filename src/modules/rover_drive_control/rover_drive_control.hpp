@@ -34,7 +34,7 @@
 #pragma once
 
 #include "differential_drive_control_kinematics.hpp"
-#include "differential_drive_control_pid.hpp"
+#include "rover_drive_control_pid.hpp"
 
 #include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/defines.h>
@@ -74,14 +74,14 @@
 #include <uORB/topics/wheel_encoders.h>
 
 
-namespace differential_drive_control
+namespace rover_drive_control
 {
 
-class DifferentialDriveControl : public ModuleBase<DifferentialDriveControl>, public ModuleParams, public px4::ScheduledWorkItem
+class RoverDriveControl : public ModuleBase<RoverDriveControl>, public ModuleParams, public px4::ScheduledWorkItem
 {
 public:
-	DifferentialDriveControl();
-	~DifferentialDriveControl() override;
+	RoverDriveControl();
+	~RoverDriveControl() override;
 
 	static int task_spawn(int argc, char *argv[]);
 
@@ -158,22 +158,23 @@ private:
 	wheel_encoders_s 			_wheel_encoder;
 
 	differential_drive_control_kinematics 	_controller;
-	differential_drive_control_pid 		_yaw_rate_point_pid;
-	differential_drive_control_pid 		_yaw_rate_align_pid;
-	differential_drive_control_pid 		_speed_control_pid;
+	rover_drive_control_pid 		_yaw_rate_point_pid;
+	rover_drive_control_pid 		_yaw_rate_align_pid;
+	rover_drive_control_pid 		_speed_control_pid;
 
 	matrix::Vector2f _input_pid{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
 	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
 	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 	matrix::Vector2f _output_forwards{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 	matrix::Vector2f _encoder_data{0.0f, 0.0f};
-	float _forwards_velocity{0.0f};
+	float 		 _forwards_velocity{0.0f};
 
 	matrix::Vector2f _global_position{0.0, 0.0};
 	matrix::Vector2f _local_position{0.0, 0.0};
 	matrix::Vector2f _current_waypoint{0.0, 0.0};
 	matrix::Vector2f _previous_waypoint{0.0, 0.0};
 	matrix::Vector2f _next_waypoint{0.0, 0.0};
+	bool 		 _intialized = false;
 
 	VelocitySmoothing _forwards_velocity_smoothing;
 	PositionSmoothing _position_smoothing;
@@ -193,4 +194,4 @@ private:
 
 };
 
-} // namespace differential_drive_control
+} // namespace rover_drive_control

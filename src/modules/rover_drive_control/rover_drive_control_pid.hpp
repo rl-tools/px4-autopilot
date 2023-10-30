@@ -40,12 +40,12 @@
 
 #include <matrix/matrix/math.hpp>
 
-class differential_drive_control_pid : public ModuleParams
+class rover_drive_control_pid : public ModuleParams
 {
 
 public:
-	differential_drive_control_pid() : ModuleParams(this) {};
-	~differential_drive_control_pid() = default;
+	rover_drive_control_pid() : ModuleParams(this) {};
+	~rover_drive_control_pid() = default;
 
 	float pid(float reference, float actual, float dt, float windup, bool normalized, float kp, float ki, float kd);
 

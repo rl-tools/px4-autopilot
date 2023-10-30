@@ -1,6 +1,6 @@
-#include "differential_drive_control_pid.hpp"
+#include "rover_drive_control_pid.hpp"
 
-float differential_drive_control_pid::pid(float reference, float actual, float dt, float windup, bool normalized, float kp, float ki, float kd)
+float rover_drive_control_pid::pid(float reference, float actual, float dt, float windup, bool normalized, float kp, float ki, float kd)
 {
 	_reference = reference;
 	_actual = actual;

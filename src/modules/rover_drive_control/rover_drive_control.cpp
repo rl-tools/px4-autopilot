@@ -31,15 +31,15 @@
  *
  ****************************************************************************/
 
-#include "differential_drive_control.hpp"
+#include "rover_drive_control.hpp"
 
 using namespace time_literals;
 using matrix::Vector3f;
 
-namespace differential_drive_control
+namespace rover_drive_control
 {
 
-DifferentialDriveControl::DifferentialDriveControl() :
+RoverDriveControl::RoverDriveControl() :
 	ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::lp_default)
 {
@@ -47,13 +47,13 @@ DifferentialDriveControl::DifferentialDriveControl() :
 	_last_timestamp = hrt_absolute_time();
 }
 
-DifferentialDriveControl::~DifferentialDriveControl()
+RoverDriveControl::~RoverDriveControl()
 {
 }
 
-int DifferentialDriveControl::task_spawn(int argc, char *argv[])
+int RoverDriveControl::task_spawn(int argc, char *argv[])
 {
-	DifferentialDriveControl *obj = new DifferentialDriveControl();
+	RoverDriveControl *obj = new RoverDriveControl();
 
 	if (!obj) {
 		PX4_ERR("alloc failed");
@@ -69,14 +69,85 @@ int DifferentialDriveControl::task_spawn(int argc, char *argv[])
 	return 0;
 }
 
-void DifferentialDriveControl::start()
+void RoverDriveControl::encoder_data_poll()
 {
-	ScheduleOnInterval(20_ms); // 50 Hz
-	// ScheduleOnInterval(1_s);
+	// TODO Add parameters that asks how many wheels there are.
+
+	float sum_left_encoders_speed = 0.0f;
+	float sum_right_encoders_speed = 0.0f;
+	int count_left_encoders = 0;
+	int count_right_encoders = 0;
+
+	for (int i = 0; i < _wheel_encoders_sub.size(); ++i) {
+		auto &sub = _wheel_encoders_sub[i];
+		if (sub.update(&_wheel_encoder)) {
+		if (i < 2) {  // Assuming first two encoders are for the right side
+			sum_right_encoders_speed += _wheel_encoder.speed;
+			count_right_encoders++;
+		} else {  // Assuming the last two encoders are for the left side
+			sum_left_encoders_speed += _wheel_encoder.speed;
+			count_left_encoders++;
+		}
+		}
+	}
+
+	if (count_right_encoders > 0 && count_left_encoders > 0) {
+		_encoder_data(0) = sum_right_encoders_speed / count_right_encoders;
+		_encoder_data(1) = sum_left_encoders_speed / count_left_encoders;
+
+		_controller.setInput(_encoder_data, false);
+
+		_output_forwards = _controller.getOutput(false);
+
+	}
+	else {
+		PX4_ERR("No encoder data received.");
+	}
 }
 
-void DifferentialDriveControl::Run()
+
+void RoverDriveControl::vehicle_control_mode_poll()
 {
+	if (_control_mode_sub.updated()) {
+		_control_mode_sub.copy(&_control_mode);
+	}
+}
+
+void RoverDriveControl::position_setpoint_triplet_poll()
+{
+	if (_pos_sp_triplet_sub.updated()) {
+		_pos_sp_triplet_sub.copy(&_pos_sp_triplet);
+	}
+}
+
+void RoverDriveControl::vehicle_position_poll()
+{
+	if(_global_pos_sub.updated()) {
+		_global_pos_sub.copy(&_global_pos);
+	}
+
+
+	if(_local_pos_sub.updated()) {
+		_local_pos_sub.copy(&_local_pos);
+	}
+
+}
+
+void RoverDriveControl::vehicle_attitude_poll()
+{
+	if (_att_sub.updated()) {
+		_att_sub.copy(&_vehicle_att);
+	}
+}
+
+void RoverDriveControl::start()
+{
+	ScheduleOnInterval(10_ms); // 100 Hz
+}
+
+void RoverDriveControl::Run()
+{
+
 	if (should_exit()) {
 		ScheduleClear();
 		exit_and_cleanup();
@@ -122,7 +193,7 @@ void DifferentialDriveControl::Run()
 
 	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
 		subscribeManualControl();
-	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) { // temporary, unless we wont have more than just these two modes
+	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
 		subscribeAutoControl();
 	} else {
 		_input_pid = {0.0f, 0.0f};
@@ -142,88 +213,15 @@ void DifferentialDriveControl::Run()
 
 }
 
-void DifferentialDriveControl::encoder_data_poll()
-{
-	// TODO Add parameters that asks how many wheels there are.
-
-	float sum_left_encoders_speed = 0.0f;
-	float sum_right_encoders_speed = 0.0f;
-	int count_left_encoders = 0;
-	int count_right_encoders = 0;
-
-	for (int i = 0; i < _wheel_encoders_sub.size(); ++i) {
-		auto &sub = _wheel_encoders_sub[i];
-		if (sub.update(&_wheel_encoder)) {
-		if (i < 2) {  // Assuming first two encoders are for the right side
-			sum_right_encoders_speed += _wheel_encoder.speed;
-			count_right_encoders++;
-		} else {  // Assuming the last two encoders are for the left side
-			sum_left_encoders_speed += _wheel_encoder.speed;
-			count_left_encoders++;
-		}
-		}
-	}
-
-	if (count_right_encoders > 0 && count_left_encoders > 0) {
-		_encoder_data(0) = sum_right_encoders_speed / count_right_encoders;
-		_encoder_data(1) = sum_left_encoders_speed / count_left_encoders;
-
-		_controller.setInput(_encoder_data, false);
-
-		_output_forwards = _controller.getOutput(false);
-
-	}
-	else {
-		PX4_ERR("No encoder data received.");
-	}
-}
-
-
-void DifferentialDriveControl::vehicle_control_mode_poll()
-{
-	if (_control_mode_sub.updated()) {
-		_control_mode_sub.copy(&_control_mode);
-	}
-}
-
-void DifferentialDriveControl::position_setpoint_triplet_poll()
-{
-	if (_pos_sp_triplet_sub.updated()) {
-		_pos_sp_triplet_sub.copy(&_pos_sp_triplet);
-	}
-}
-
-void DifferentialDriveControl::vehicle_position_poll()
-{
-	if(_global_pos_sub.updated()) {
-		_global_pos_sub.copy(&_global_pos);
-	}
-
-
-	if(_local_pos_sub.updated()) {
-		_local_pos_sub.copy(&_local_pos);
-	}
-
-}
-
-void DifferentialDriveControl::vehicle_attitude_poll()
-{
-	if (_att_sub.updated()) {
-		_att_sub.copy(&_vehicle_att);
-	}
-}
-
-void DifferentialDriveControl::subscribeManualControl()
+void RoverDriveControl::subscribeManualControl()
 {
 	_manual_control_setpoint_sub.copy(&_manual_control_setpoint);
 
 	_input_feed_forward(0) = _manual_control_setpoint.throttle*100;
 	_input_feed_forward(1) = _manual_control_setpoint.roll*20;
-
-	// PX4_ERR("My control inputs direcly are %f and %f", (double)_input_feed_forward(0), (double)_input_feed_forward(1));
 }
 
-void DifferentialDriveControl::getLocalVelocity()
+void RoverDriveControl::getLocalVelocity()
 {
 	Vector2f velocity_vector{0.0, 0.0};
 
@@ -233,7 +231,7 @@ void DifferentialDriveControl::getLocalVelocity()
 	_forwards_velocity = velocity_vector.norm();
 }
 
-void DifferentialDriveControl::subscribeAutoControl()
+void RoverDriveControl::subscribeAutoControl()
 {
 
 	_global_position(0) = _global_pos.lat;
@@ -245,19 +243,34 @@ void DifferentialDriveControl::subscribeAutoControl()
 	_current_waypoint(0) = _pos_sp_triplet.current.lat;
 	_current_waypoint(1) = _pos_sp_triplet.current.lon;
 
-	_previous_waypoint(0) = _pos_sp_triplet.previous.lat;
-	_previous_waypoint(1) = _pos_sp_triplet.previous.lon;
+	// _previous_waypoint(0) = _pos_sp_triplet.previous.lat;
+	// _previous_waypoint(1) = _pos_sp_triplet.previous.lon;
+
+	if(!PX4_ISFINITE(_pos_sp_triplet.previous.lat) && !_intialized){
+		// PX4_ERR("fixing bad initialization");
+		_previous_waypoint(0) = _global_position(0);
+		_previous_waypoint(1) = _global_position(1);
+		// PX4_ERR("new init: %f %f", (double)_previous_waypoint(0), (double)_previous_waypoint(1));
+		_intialized = true;
+	} else if (PX4_ISFINITE(_pos_sp_triplet.previous.lat)){
+		_previous_waypoint(0) = _pos_sp_triplet.previous.lat;
+		_previous_waypoint(1) = _pos_sp_triplet.previous.lon;
+	}
 
 	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
 
 	// calculate bearing
 	// float desired_heading = computeBearing(_global_position, _current_waypoint);
+
+	// PX4_ERR("new init going into computeadvancedbearing: %f %f", (double)_previous_waypoint(0), (double)_previous_waypoint(1));
+
 	float desired_heading = computeAdvancedBearing(_global_position, _current_waypoint, _previous_waypoint);
 
 	float distance_to_next_wp = get_distance_to_next_waypoint(_global_position(0), _global_position(1),
 								  _current_waypoint(0), _current_waypoint(1));
 
 	float heading_error = normalizeAngle(desired_heading - vehicle_yaw);
+	// PX4_ERR("heading error %f", (double)heading_error);
 	// float heading_error = 0;
 
 	float align_error = computeAlignment(_global_position, _current_waypoint, _previous_waypoint);
@@ -266,6 +279,8 @@ void DifferentialDriveControl::subscribeAutoControl()
 	_dt = getDt();
 
 	float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, true, 2, 0.4, 0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, true, 1, 0.2, 0);
+
+	// PX4_ERR("Desired angular rate %f", (double)desired_angular_rate);
 
 	// float desired_linear_speed = computeDesiredSpeed(distance_to_next_wp);
 	float desired_linear_velocity = 2;
@@ -295,7 +310,7 @@ void DifferentialDriveControl::subscribeAutoControl()
 }
 
 //temporary
-void DifferentialDriveControl::publishAllocation()
+void RoverDriveControl::publishAllocation()
 {
 	vehicle_thrust_setpoint_s v_thrust_sp{};
 	v_thrust_sp.timestamp = hrt_absolute_time();
@@ -312,13 +327,13 @@ void DifferentialDriveControl::publishAllocation()
 	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
 }
 
-float DifferentialDriveControl::getDt()
+float RoverDriveControl::getDt()
 {
 
 	return ((_current_timestamp - _last_timestamp)/1000000);
 }
 
-float DifferentialDriveControl::computeAlignment(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint)
+float RoverDriveControl::computeAlignment(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint)
 {
     matrix::Vector2f wanted_path = waypoint - previous_waypoint;
     matrix::Vector2f current_path = current_pos - previous_waypoint;
@@ -338,20 +353,23 @@ float DifferentialDriveControl::computeAlignment(const matrix::Vector2f& current
 }
 
 
-float DifferentialDriveControl::computeDesiredSpeed(float distance) {
+float RoverDriveControl::computeDesiredSpeed(float distance) {
         // You may want to tune these parameters
         float max_speed = 1.0;  // Max linear speed
         float speed_scaling_factor = 1.0;  // How quickly the speed decreases with distance
         return max_speed * std::exp(-speed_scaling_factor * distance);
 }
 
-float DifferentialDriveControl::computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint) {
+float RoverDriveControl::computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint) {
         float delta_x = waypoint(0) - current_pos(0);
         float delta_y = waypoint(1) - current_pos(1);
         return std::atan2(delta_y, delta_x);
 }
 
-float DifferentialDriveControl::computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint) {
+float RoverDriveControl::computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint) {
+
+	// PX4_ERR("two waypoints: %f %f", (double)previous_waypoint(0), (double)previous_waypoint(1));
+
         matrix::Vector2f wanted_path = waypoint - previous_waypoint;
 	matrix::Vector2f current_path = current_pos - previous_waypoint;
 
@@ -372,17 +390,19 @@ float DifferentialDriveControl::computeAdvancedBearing(const matrix::Vector2f& c
 
 	matrix::Vector2f new_waypoint = -v1*10 + waypoint;
 
+	// PX4_ERR("two waypoints: %f %f and %f %f", (double)current_pos(0), (double)current_pos(1), (double)new_waypoint(0), (double)new_waypoint(1));
+
 	return computeBearing(current_pos, new_waypoint);
 }
 
-float DifferentialDriveControl::normalizeAngle(float angle) {
+float RoverDriveControl::normalizeAngle(float angle) {
 	// wtf, i hope no one sees this for now lol
         while (angle > (float)M_PI) angle -= (float)2.0 * (float)M_PI;
         while (angle < -(float)M_PI) angle += (float)2.0 * (float)M_PI;
         return angle;
 }
 
-void DifferentialDriveControl::publishRateControl()
+void RoverDriveControl::publishRateControl()
 {
 	// magnetometer_bias_estimate_s mag_bias_est{};
 	differential_drive_control_s diff_drive_control{};
@@ -399,13 +419,13 @@ void DifferentialDriveControl::publishRateControl()
 
 }
 
-int DifferentialDriveControl::print_status()
+int RoverDriveControl::print_status()
 {
 
 	return 0;
 }
 
-int DifferentialDriveControl::print_usage(const char *reason)
+int RoverDriveControl::print_usage(const char *reason)
 {
 	if (reason) {
 		PX4_ERR("%s\n", reason);
@@ -423,9 +443,9 @@ Online magnetometer bias estimator.
 	return 0;
 }
 
-extern "C" __EXPORT int differential_drive_control_main(int argc, char *argv[])
+extern "C" __EXPORT int rover_drive_control_main(int argc, char *argv[])
 {
-	return DifferentialDriveControl::main(argc, argv);
+	return RoverDriveControl::main(argc, argv);
 }
 
 } // namespace load_mon

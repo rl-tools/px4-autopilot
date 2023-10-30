@@ -33,6 +33,8 @@
 
 #include "ekf.h"
 
+#if defined(CONFIG_EKF2_AUXVEL)
+
 void Ekf::controlAuxVelFusion()
 {
 	if (_auxvel_buffer) {
@@ -57,3 +59,4 @@ void Ekf::stopAuxVelFusion()
 	//_control_status.flags.aux_vel = false;
 	resetEstimatorAidStatus(_aid_src_aux_vel);
 }
+#endif // CONFIG_EKF2_AUXVEL
