@@ -39,7 +39,7 @@
  *
  * @boolean
  * @reboot_required true
- * @group Differential Drive Control
+ * @group Rover Drive Control
  */
 PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 0.54f);
 
@@ -53,7 +53,7 @@ PARAM_DEFINE_FLOAT(DDC_WHEEL_BASE, 0.54f);
  * @max 100
  * @increment 0.001
  * @decimal 5
- * @group Differential Drive Control
+ * @group Rover Drive Control
  */
 PARAM_DEFINE_FLOAT(DDC_WHEEL_RADIUS, 0.0686f);
 

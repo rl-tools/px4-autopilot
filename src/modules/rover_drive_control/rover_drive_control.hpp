@@ -113,7 +113,6 @@ private:
 	void vehicle_attitude_poll();
 	void encoder_data_poll();
 	float getDt();
-	void getLocalVelocity();
 
 	float computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint);
 	float computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
@@ -121,20 +120,8 @@ private:
 	float computeAlignment(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint);
 	float computeDesiredSpeed(float distance);
 
-	// temporary
-
-	void publishAllocation();
-
-	// void publish(double linear_x, double angular_z);
-
 	uORB::Publication<differential_drive_control_s> _differential_drive_control_pub{ORB_ID(differential_drive_control)};
 	uORB::PublicationMulti<actuator_outputs_s> _outputs_pub{ORB_ID(actuator_outputs)};
-
-	// temporary
-
-	uORB::Publication<vehicle_thrust_setpoint_s>	_vehicle_thrust_setpoint_pub{ORB_ID(vehicle_thrust_setpoint)};
-	uORB::Publication<vehicle_torque_setpoint_s>	_vehicle_torque_setpoint_pub{ORB_ID(vehicle_torque_setpoint)};
-
 
 	uORB::Subscription _parameter_update_sub{ORB_ID(parameter_update)};
 	uORB::Subscription _vehicle_angular_velocity_sub{ORB_ID(vehicle_angular_velocity)};
@@ -145,7 +132,6 @@ private:
 	uORB::Subscription _global_pos_sub{ORB_ID(vehicle_global_position)};
 	uORB::Subscription _local_pos_sub{ORB_ID(vehicle_local_position)};
 	uORB::Subscription _att_sub{ORB_ID(vehicle_attitude)};
-	// uORB::Subscription _encoder_data_sub{ORB_ID(wheel_encoders)};
 	uORB::SubscriptionMultiArray<wheel_encoders_s>	_wheel_encoders_sub{ORB_ID::wheel_encoders};
 
 	differential_drive_control_s 		_diff_drive_control{};
@@ -156,10 +142,10 @@ private:
 	vehicle_global_position_s		_global_pos{};			/**< global vehicle position */
 	vehicle_local_position_s		_local_pos{};			/**< global vehicle position */
 	vehicle_attitude_s			_vehicle_att{};
-	wheel_encoders_s 			_wheel_encoder;
+	wheel_encoders_s 			_wheel_encoder{};
 
-	differential_drive_control_kinematics 	_kinematics_controller;
-	differential_drive_control_guidance 	_guidance_controller;
+	differential_drive_control_kinematics 	_differential_kinematics_controller;
+	differential_drive_control_guidance 	_differential_guidance_controller;
 	rover_drive_control_pid 		_yaw_rate_point_pid;
 	rover_drive_control_pid 		_yaw_rate_align_pid;
 	rover_drive_control_pid 		_speed_control_pid;
@@ -176,23 +162,18 @@ private:
 	matrix::Vector2f _current_waypoint{0.0, 0.0};
 	matrix::Vector2f _previous_waypoint{0.0, 0.0};
 	matrix::Vector2f _next_waypoint{0.0, 0.0};
-	bool 		 _intialized = false;
+	bool 		 _first_waypoint_intialized = false;
 
 	VelocitySmoothing _forwards_velocity_smoothing;
 	PositionSmoothing _position_smoothing;
 
 	double _theta{0.0};
-
 	float _dt{0.0};
 	float _last_timestamp{0.0};
 	float _current_timestamp{0.0};
 
 	uint8_t _arming_state{0};
 	bool _system_calibrating{false};
-
-	// temporary
-
-	// gz::transport::Node::Publisher _actuators_pub;
 
 };
 

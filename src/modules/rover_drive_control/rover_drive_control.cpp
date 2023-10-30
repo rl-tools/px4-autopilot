@@ -69,6 +69,133 @@ int RoverDriveControl::task_spawn(int argc, char *argv[])
 	return 0;
 }
 
+void RoverDriveControl::Run()
+{
+
+	if (should_exit()) {
+		ScheduleClear();
+		exit_and_cleanup();
+	}
+
+	_current_timestamp = hrt_absolute_time();
+
+	vehicle_control_mode_poll();
+	position_setpoint_triplet_poll();
+	vehicle_position_poll();
+	vehicle_attitude_poll();
+	encoder_data_poll();
+	_dt = getDt();
+
+	if (_vehicle_status_sub.updated()) {
+		vehicle_status_s vehicle_status;
+
+		if (_vehicle_status_sub.copy(&vehicle_status)) {
+			if (_arming_state != vehicle_status.arming_state) {
+				_arming_state = vehicle_status.arming_state;
+
+			}
+			bool system_calibrating = vehicle_status.calibration_enabled;
+
+			if (system_calibrating != _system_calibrating) {
+				_system_calibrating = system_calibrating;
+
+			}
+		}
+	}
+
+	// check for parameter updates
+	if (_parameter_update_sub.updated()) {
+		// clear update
+		parameter_update_s pupdate;
+		_parameter_update_sub.copy(&pupdate);
+
+		// update parameters from storage
+		updateParams();
+	}
+
+	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
+		subscribeManualControl();
+	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
+
+		subscribeAutoControl();
+	} else {
+		_input_pid = {0.0f, 0.0f};
+		_input_feed_forward = {0.0f, 0.0f};
+	}
+
+	/////// Fix this section, does not work well with the inverse bool
+	_differential_kinematics_controller.setInput(_input_feed_forward + _input_pid, true);
+
+	_output_inverse = _differential_kinematics_controller.getOutput(true);
+
+	publishRateControl();
+
+	//////////////////////////////////////////////////////////////////
+
+	_last_timestamp = _current_timestamp;
+
+}
+
+void RoverDriveControl::subscribeManualControl()
+{
+	_manual_control_setpoint_sub.copy(&_manual_control_setpoint);
+
+	_input_feed_forward(0) = _manual_control_setpoint.throttle*100;
+	_input_feed_forward(1) = _manual_control_setpoint.roll*20;
+}
+
+void RoverDriveControl::subscribeAutoControl()
+{
+
+	_global_position(0) = _global_pos.lat;
+	_global_position(1) = _global_pos.lon;
+
+	_next_waypoint(0) = _pos_sp_triplet.next.lat;
+	_next_waypoint(1) = _pos_sp_triplet.next.lon;
+
+	_current_waypoint(0) = _pos_sp_triplet.current.lat;
+	_current_waypoint(1) = _pos_sp_triplet.current.lon;
+
+	if(!PX4_ISFINITE(_pos_sp_triplet.previous.lat) && !_first_waypoint_intialized){
+		_previous_waypoint(0) = _global_position(0);
+		_previous_waypoint(1) = _global_position(1);
+		_first_waypoint_intialized = true;
+	} else if (PX4_ISFINITE(_pos_sp_triplet.previous.lat)){
+		_previous_waypoint(0) = _pos_sp_triplet.previous.lat;
+		_previous_waypoint(1) = _pos_sp_triplet.previous.lon;
+	}
+
+	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
+
+	matrix::Vector2f guidance_output = _differential_guidance_controller.computeGuidance(_global_position, _current_waypoint, _previous_waypoint, _next_waypoint, vehicle_yaw, _dt);
+
+	_input_feed_forward(0) = guidance_output(0);
+	_input_feed_forward(1) = guidance_output(1);
+
+}
+
+float RoverDriveControl::getDt()
+{
+
+	return ((_current_timestamp - _last_timestamp)/1000000);
+}
+
+void RoverDriveControl::publishRateControl()
+{
+	differential_drive_control_s diff_drive_control{};
+
+	diff_drive_control.motor_control[0] = _output_inverse(0);
+	diff_drive_control.motor_control[1] = _output_inverse(1);
+
+	diff_drive_control.linear_velocity[0] = _output_forwards(0);
+	diff_drive_control.angular_velocity[2] = _output_forwards(1);
+
+	diff_drive_control.timestamp = hrt_absolute_time();
+
+	_differential_drive_control_pub.publish(diff_drive_control);
+
+}
+
 void RoverDriveControl::encoder_data_poll()
 {
 	// TODO Add parameters that asks how many wheels there are.
@@ -95,9 +222,9 @@ void RoverDriveControl::encoder_data_poll()
 		_encoder_data(0) = sum_right_encoders_speed / count_right_encoders;
 		_encoder_data(1) = sum_left_encoders_speed / count_left_encoders;
 
-		_kinematics_controller.setInput(_encoder_data, false);
+		_differential_kinematics_controller.setInput(_encoder_data, false);
 
-		_output_forwards = _kinematics_controller.getOutput(false);
+		_output_forwards = _differential_kinematics_controller.getOutput(false);
 
 	}
 	else {
@@ -145,168 +272,6 @@ void RoverDriveControl::start()
 	ScheduleOnInterval(10_ms); // 100 Hz
 }
 
-void RoverDriveControl::Run()
-{
-
-	if (should_exit()) {
-		ScheduleClear();
-		exit_and_cleanup();
-	}
-
-	_current_timestamp = hrt_absolute_time();
-
-	vehicle_control_mode_poll();
-	position_setpoint_triplet_poll();
-	vehicle_position_poll();
-	vehicle_attitude_poll();
-	getLocalVelocity();
-	encoder_data_poll();
-	_dt = getDt();
-
-	if (_vehicle_status_sub.updated()) {
-		vehicle_status_s vehicle_status;
-
-		if (_vehicle_status_sub.copy(&vehicle_status)) {
-			if (_arming_state != vehicle_status.arming_state) {
-				_arming_state = vehicle_status.arming_state;
-
-			}
-
-			// check this
-			bool system_calibrating = vehicle_status.calibration_enabled;
-
-			if (system_calibrating != _system_calibrating) {
-				_system_calibrating = system_calibrating;
-
-			}
-		}
-	}
-
-	// check for parameter updates
-	if (_parameter_update_sub.updated()) {
-		// clear update
-		parameter_update_s pupdate;
-		_parameter_update_sub.copy(&pupdate);
-
-		// update parameters from storage
-		updateParams();
-	}
-
-	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
-		subscribeManualControl();
-	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
-
-		subscribeAutoControl();
-	} else {
-		_input_pid = {0.0f, 0.0f};
-		_input_feed_forward = {0.0f, 0.0f};
-	}
-
-	/////// Fix this section, does not work well with the inverse bool
-	_kinematics_controller.setInput(_input_feed_forward + _input_pid, true);
-
-	_output_inverse = _kinematics_controller.getOutput(true);
-
-	publishRateControl();
-
-	//////////////////////////////////////////////////////////////////
-
-	_last_timestamp = _current_timestamp;
-
-}
-
-void RoverDriveControl::subscribeManualControl()
-{
-	_manual_control_setpoint_sub.copy(&_manual_control_setpoint);
-
-	_input_feed_forward(0) = _manual_control_setpoint.throttle*100;
-	_input_feed_forward(1) = _manual_control_setpoint.roll*20;
-}
-
-void RoverDriveControl::getLocalVelocity()
-{
-	Vector2f velocity_vector{0.0, 0.0};
-
-	velocity_vector(0) = _local_pos.vx;
-	velocity_vector(1) = _local_pos.vy;
-
-	_forwards_velocity = velocity_vector.norm();
-}
-
-void RoverDriveControl::subscribeAutoControl()
-{
-
-	_global_position(0) = _global_pos.lat;
-	_global_position(1) = _global_pos.lon;
-
-	_next_waypoint(0) = _pos_sp_triplet.next.lat;
-	_next_waypoint(1) = _pos_sp_triplet.next.lon;
-
-	_current_waypoint(0) = _pos_sp_triplet.current.lat;
-	_current_waypoint(1) = _pos_sp_triplet.current.lon;
-
-	if(!PX4_ISFINITE(_pos_sp_triplet.previous.lat) && !_intialized){
-		// PX4_ERR("fixing bad initialization");
-		_previous_waypoint(0) = _global_position(0);
-		_previous_waypoint(1) = _global_position(1);
-		// PX4_ERR("new init: %f %f", (double)_previous_waypoint(0), (double)_previous_waypoint(1));
-		_intialized = true;
-	} else if (PX4_ISFINITE(_pos_sp_triplet.previous.lat)){
-		_previous_waypoint(0) = _pos_sp_triplet.previous.lat;
-		_previous_waypoint(1) = _pos_sp_triplet.previous.lon;
-	}
-
-	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
-
-	matrix::Vector2f guidance_output = _guidance_controller.computeGuidance(_global_position, _current_waypoint, _previous_waypoint, _next_waypoint, vehicle_yaw, _dt);
-
-	_input_feed_forward(0) = guidance_output(0);
-
-	_input_feed_forward(1) = guidance_output(1);
-
-}
-
-//temporary
-void RoverDriveControl::publishAllocation()
-{
-	vehicle_thrust_setpoint_s v_thrust_sp{};
-	v_thrust_sp.timestamp = hrt_absolute_time();
-	v_thrust_sp.xyz[0] = _manual_control_setpoint.throttle;
-	v_thrust_sp.xyz[1] = 0.0f;
-	v_thrust_sp.xyz[2] = 0.0f;
-	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
-
-	vehicle_torque_setpoint_s v_torque_sp{};
-	v_torque_sp.timestamp = hrt_absolute_time();
-	v_torque_sp.xyz[0] = 0.f;
-	v_torque_sp.xyz[1] = 0.f;
-	v_torque_sp.xyz[2] = _manual_control_setpoint.roll;
-	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
-}
-
-float RoverDriveControl::getDt()
-{
-
-	return ((_current_timestamp - _last_timestamp)/1000000);
-}
-
-void RoverDriveControl::publishRateControl()
-{
-	// magnetometer_bias_estimate_s mag_bias_est{};
-	differential_drive_control_s diff_drive_control{};
-
-	diff_drive_control.motor_control[0] = _output_inverse(0);
-	diff_drive_control.motor_control[1] = _output_inverse(1);
-
-	diff_drive_control.linear_velocity[0] = _output_forwards(0);
-	diff_drive_control.angular_velocity[2] = _output_forwards(1);
-
-	diff_drive_control.timestamp = hrt_absolute_time();
-
-	_differential_drive_control_pub.publish(diff_drive_control);
-
-}
-
 int RoverDriveControl::print_status()
 {
 
@@ -322,10 +287,10 @@ int RoverDriveControl::print_usage(const char *reason)
 	PRINT_MODULE_DESCRIPTION(
 		R"DESCR_STR(
 ### Description
-Online magnetometer bias estimator.
+Online rover controller.
 )DESCR_STR");
 
-	PRINT_MODULE_USAGE_NAME("mag_bias_estimator", "system");
+	PRINT_MODULE_USAGE_NAME("rover_drive_control", "system");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("start", "Start the background task");
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 	return 0;
@@ -336,4 +301,4 @@ extern "C" __EXPORT int rover_drive_control_main(int argc, char *argv[])
 	return RoverDriveControl::main(argc, argv);
 }
 
-} // namespace load_mon
+} // namespace rover_drive_control
