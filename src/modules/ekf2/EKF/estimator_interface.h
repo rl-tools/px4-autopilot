@@ -138,7 +138,7 @@ public:
 #endif // CONFIG_EKF2_EXTERNAL_VISION
 
 #if defined(CONFIG_EKF2_AUXVEL)
-	void setAuxVelData(const auxVelSample &auxvel_sample);
+	void setAuxVelData(const auxVelSample_rover &auxvel_sample);
 #endif // CONFIG_EKF2_AUXVEL
 
 	void setSystemFlagData(const systemFlagUpdate &system_flags);
@@ -439,7 +439,7 @@ protected:
 	uint64_t _time_last_ext_vision_buffer_push{0};
 #endif // CONFIG_EKF2_EXTERNAL_VISION
 #if defined(CONFIG_EKF2_AUXVEL)
-	RingBuffer<auxVelSample> *_auxvel_buffer{nullptr};
+	RingBuffer<auxVelSample_rover> *_auxvel_buffer{nullptr};
 #endif // CONFIG_EKF2_AUXVEL
 	RingBuffer<systemFlagUpdate> *_system_flag_buffer{nullptr};
 

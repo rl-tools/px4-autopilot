@@ -36,13 +36,13 @@
 void Ekf::controlAuxVelFusion()
 {
 	if (_auxvel_buffer) {
-		auxVelSample auxvel_sample_delayed;
+		auxVelSample_rover auxvel_sample_delayed;
 
 		if (_auxvel_buffer->pop_first_older_than(_time_delayed_us, &auxvel_sample_delayed)) {
 
 			resetEstimatorAidStatus(_aid_src_aux_vel);
 
-			updateVelocityAidSrcStatus(auxvel_sample_delayed.time_us, auxvel_sample_delayed.vel, auxvel_sample_delayed.velVar, fmaxf(_params.auxvel_gate, 1.f), _aid_src_aux_vel);
+			updateVelocityAidSrcStatus(auxvel_sample_delayed.time_us, auxvel_sample_delayed.linvel, auxvel_sample_delayed.linvelVar, fmaxf(_params.auxvel_gate, 1.f), _aid_src_aux_vel);
 
 			if (isHorizontalAidingActive()) {
 				fuseVelocity(_aid_src_aux_vel);

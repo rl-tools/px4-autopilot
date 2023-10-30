@@ -243,7 +243,8 @@ EKF2::~EKF2()
 	perf_free(_msg_missed_gps_perf);
 #endif // CONFIG_EKF2_GNSS
 #if defined(CONFIG_EKF2_AUXVEL)
-	perf_free(_msg_missed_landing_target_pose_perf);
+	// perf_free(_msg_missed_landing_target_pose_perf);
+	perf_free(_msg_missed_differential_drive_control_perf);
 #endif // CONFIG_EKF2_AUXVEL
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 	perf_free(_msg_missed_magnetometer_perf);
@@ -414,7 +415,8 @@ int EKF2::print_status()
 	perf_print_counter(_msg_missed_gps_perf);
 #endif // CONFIG_EKF2_GNSS
 #if defined(CONFIG_EKF2_AUXVEL)
-	perf_print_counter(_msg_missed_landing_target_pose_perf);
+	// perf_print_counter(_msg_missed_landing_target_pose_perf);
+	perf_print_counter(_msg_missed_differential_drive_control_perf);
 #endif // CONFIG_EKF2_AUXVEL
 #if defined(CONFIG_EKF2_MAGNETOMETER)
 	perf_print_counter(_msg_missed_magnetometer_perf);
@@ -2117,26 +2119,25 @@ void EKF2::UpdateAuxVelSample(ekf2_timestamps_s &ekf2_timestamps)
 	// EKF auxiliary velocity sample
 	//  - use the landing target pose estimate as another source of velocity data
 	const unsigned last_generation = _landing_target_pose_sub.get_last_generation();
-	landing_target_pose_s landing_target_pose;
 
-	if (_landing_target_pose_sub.update(&landing_target_pose)) {
-		if (_msg_missed_landing_target_pose_perf == nullptr) {
-			_msg_missed_landing_target_pose_perf = perf_alloc(PC_COUNT, MODULE_NAME": landing_target_pose messages missed");
+	differential_drive_control_s differential_drive_control;
 
-		} else if (_landing_target_pose_sub.get_last_generation() != last_generation + 1) {
-			perf_count(_msg_missed_landing_target_pose_perf);
+	if(_differential_drive_control_sub.update(&differential_drive_control)) {
+		if (_msg_missed_differential_drive_control_perf == nullptr) {
+			_msg_missed_differential_drive_control_perf = perf_alloc(PC_COUNT, MODULE_NAME": Rover EKF2 messages missed");
+
+		} else if (_differential_drive_control_sub.get_last_generation() != last_generation + 1) {
+			perf_count(_msg_missed_differential_drive_control_perf);
 		}
 
-		// we can only use the landing target if it has a fixed position and  a valid velocity estimate
-		if (landing_target_pose.is_static && landing_target_pose.rel_vel_valid) {
-			// velocity of vehicle relative to target has opposite sign to target relative to vehicle
-			auxVelSample auxvel_sample{
-				.time_us = landing_target_pose.timestamp,
-				.vel = Vector2f{-landing_target_pose.vx_rel, -landing_target_pose.vy_rel},
-				.velVar = Vector2f{landing_target_pose.cov_vx_rel, landing_target_pose.cov_vy_rel},
-			};
-			_ekf.setAuxVelData(auxvel_sample);
-		}
+		auxVelSample_rover auxvel_sample{
+			.time_us = differential_drive_control.timestamp,
+			.linvel = Vector2f{differential_drive_control.linear_velocity[0], differential_drive_control.linear_velocity[1]},
+			.linvelVar = Vector2f{0, 0},
+			.angvel = float{differential_drive_control.angular_velocity[2]},
+			.angvelVar = float{0},
+		};
+		_ekf.setAuxVelData(auxvel_sample);
 	}
 }
 #endif // CONFIG_EKF2_AUXVEL

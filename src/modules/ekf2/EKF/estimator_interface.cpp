@@ -417,7 +417,7 @@ void EstimatorInterface::setExtVisionData(const extVisionSample &evdata)
 #endif // CONFIG_EKF2_EXTERNAL_VISION
 
 #if defined(CONFIG_EKF2_AUXVEL)
-void EstimatorInterface::setAuxVelData(const auxVelSample &auxvel_sample)
+void EstimatorInterface::setAuxVelData(const auxVelSample_rover &auxvel_sample)
 {
 	if (!_initialised) {
 		return;
@@ -425,7 +425,7 @@ void EstimatorInterface::setAuxVelData(const auxVelSample &auxvel_sample)
 
 	// Allocate the required buffer size if not previously done
 	if (_auxvel_buffer == nullptr) {
-		_auxvel_buffer = new RingBuffer<auxVelSample>(_obs_buffer_length);
+		_auxvel_buffer = new RingBuffer<auxVelSample_rover>(_obs_buffer_length);
 
 		if (_auxvel_buffer == nullptr || !_auxvel_buffer->valid()) {
 			delete _auxvel_buffer;
@@ -442,7 +442,7 @@ void EstimatorInterface::setAuxVelData(const auxVelSample &auxvel_sample)
 	// limit data rate to prevent data being lost
 	if (time_us >= static_cast<int64_t>(_auxvel_buffer->get_newest().time_us + _min_obs_interval_us)) {
 
-		auxVelSample auxvel_sample_new{auxvel_sample};
+		auxVelSample_rover auxvel_sample_new{auxvel_sample};
 		auxvel_sample_new.time_us = time_us;
 
 		_auxvel_buffer->push(auxvel_sample_new);

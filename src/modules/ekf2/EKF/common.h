@@ -260,6 +260,16 @@ struct auxVelSample {
 	Vector2f    vel{};         ///< measured NE velocity relative to the local origin (m/sec)
 	Vector2f    velVar{};      ///< estimated error variance of the NE velocity (m/sec)**2
 };
+
+struct auxVelSample_rover {
+	uint64_t    time_us{};     ///< timestamp of the measurement (uSec)
+
+	Vector2f    linvel{};         ///< measured NE velocity relative to the local origin (m/sec)
+	Vector2f    linvelVar{};      ///< estimated error variance of the NE velocity (m/sec)**2
+
+	float       angvel{};
+	float    angvelVar{};
+};
 #endif // CONFIG_EKF2_AUXVEL
 
 struct systemFlagUpdate {
