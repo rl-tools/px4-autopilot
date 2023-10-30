@@ -34,6 +34,7 @@
 #pragma once
 
 #include "differential_drive_control_kinematics.hpp"
+#include "differential_drive_control_guidance.hpp"
 #include "rover_drive_control_pid.hpp"
 
 #include <px4_platform_common/px4_config.h>
@@ -157,7 +158,8 @@ private:
 	vehicle_attitude_s			_vehicle_att{};
 	wheel_encoders_s 			_wheel_encoder;
 
-	differential_drive_control_kinematics 	_controller;
+	differential_drive_control_kinematics 	_kinematics_controller;
+	differential_drive_control_guidance 	_guidance_controller;
 	rover_drive_control_pid 		_yaw_rate_point_pid;
 	rover_drive_control_pid 		_yaw_rate_align_pid;
 	rover_drive_control_pid 		_speed_control_pid;

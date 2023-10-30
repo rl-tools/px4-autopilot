@@ -1,20 +1,60 @@
 #include "differential_drive_control_guidance.hpp"
 
 
-void differential_drive_control_guidance::computeGuidance()
-{	
+matrix::Vector2f differential_drive_control_guidance::computeGuidance(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint, const matrix::Vector2f& next_waypoint, float vehicle_yaw, float dt)
+{		
+		_global_position = current_pos;
+		_current_waypoint = waypoint; 
+		_previous_waypoint = previous_waypoint;
+		_next_waypoint = next_waypoint;
+		_dt = dt; 
+
 		float desired_heading = computeAdvancedBearing(_global_position, _current_waypoint, _previous_waypoint);
 
 		float distance_to_next_wp = get_distance_to_next_waypoint(_global_position(0), _global_position(1),
 									_current_waypoint(0), _current_waypoint(1));
 
+		// if (distance_to_next_wp < 2) {
+		// 	matrix::Vector2f output; 
+		// 	output(0) = 0;
+		// 	output(1) = 0;
+		// 	return output;  // We are closer than loiter radius to waypoint, stop.
+
+		// }
+
 		float heading_error = normalizeAngle(desired_heading - vehicle_yaw);
 
 		float align_error = computeAlignment(_global_position, _current_waypoint, _previous_waypoint);
 
-		float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, true, 2, 0.4, 0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, true, 1, 0.2, 0);
+		float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, true, 1, 0.0, 0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, true, 1, 0.0, 0);
 
-		return;
+		// change this, make it a parameter or something
+		float desired_linear_velocity = 2;
+
+		// initialize this at the start of the function 
+		_forwards_velocity_smoothing.setMaxJerk(22);
+		_forwards_velocity_smoothing.setMaxAccel(2);
+		_forwards_velocity_smoothing.setMaxVel(4);
+
+		const float max_velocity = math::trajectory::computeMaxSpeedFromDistance(22, 1, distance_to_next_wp, 0.0f);
+
+		_forwards_velocity_smoothing.updateDurations(max_velocity);
+
+		_forwards_velocity_smoothing.updateTraj(_dt);
+
+		desired_linear_velocity = _forwards_velocity_smoothing.getCurrentVelocity();
+
+		matrix::Vector2f output; 
+
+		if ((_current_waypoint == _next_waypoint) && (double)distance_to_next_wp < 0.2) {
+			output(0) = 0;
+			output(1) = 0;
+		} else {
+			output(0) = desired_linear_velocity;
+			output(1) = desired_angular_rate;
+		}
+
+		return output; 
 }
 
 

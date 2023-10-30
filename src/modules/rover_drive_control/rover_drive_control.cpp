@@ -95,9 +95,9 @@ void RoverDriveControl::encoder_data_poll()
 		_encoder_data(0) = sum_right_encoders_speed / count_right_encoders;
 		_encoder_data(1) = sum_left_encoders_speed / count_left_encoders;
 
-		_controller.setInput(_encoder_data, false);
+		_kinematics_controller.setInput(_encoder_data, false);
 
-		_output_forwards = _controller.getOutput(false);
+		_output_forwards = _kinematics_controller.getOutput(false);
 
 	}
 	else {
@@ -161,6 +161,7 @@ void RoverDriveControl::Run()
 	vehicle_attitude_poll();
 	getLocalVelocity();
 	encoder_data_poll();
+	_dt = getDt();
 
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
@@ -194,6 +195,7 @@ void RoverDriveControl::Run()
 	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
 		subscribeManualControl();
 	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
+
 		subscribeAutoControl();
 	} else {
 		_input_pid = {0.0f, 0.0f};
@@ -201,9 +203,9 @@ void RoverDriveControl::Run()
 	}
 
 	/////// Fix this section, does not work well with the inverse bool
-	_controller.setInput(_input_feed_forward + _input_pid, true);
+	_kinematics_controller.setInput(_input_feed_forward + _input_pid, true);
 
-	_output_inverse = _controller.getOutput(true);
+	_output_inverse = _kinematics_controller.getOutput(true);
 
 	publishRateControl();
 
@@ -256,54 +258,12 @@ void RoverDriveControl::subscribeAutoControl()
 
 	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
 
-	// calculate bearing
-	// float desired_heading = computeBearing(_global_position, _current_waypoint);
+	matrix::Vector2f guidance_output = _guidance_controller.computeGuidance(_global_position, _current_waypoint, _previous_waypoint, _next_waypoint, vehicle_yaw, _dt);
 
-	// PX4_ERR("new init going into computeadvancedbearing: %f %f", (double)_previous_waypoint(0), (double)_previous_waypoint(1));
+	_input_feed_forward(0) = guidance_output(0);
 
-	float desired_heading = computeAdvancedBearing(_global_position, _current_waypoint, _previous_waypoint);
+	_input_feed_forward(1) = guidance_output(1);
 
-	float distance_to_next_wp = get_distance_to_next_waypoint(_global_position(0), _global_position(1),
-								  _current_waypoint(0), _current_waypoint(1));
-
-	float heading_error = normalizeAngle(desired_heading - vehicle_yaw);
-	// PX4_ERR("heading error %f", (double)heading_error);
-	// float heading_error = 0;
-
-	float align_error = computeAlignment(_global_position, _current_waypoint, _previous_waypoint);
-	// float align_error = 0;
-
-	_dt = getDt();
-
-	float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, true, 2, 0.4, 0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, true, 1, 0.2, 0);
-
-	// PX4_ERR("Desired angular rate %f", (double)desired_angular_rate);
-
-	// float desired_linear_speed = computeDesiredSpeed(distance_to_next_wp);
-	float desired_linear_velocity = 2;
-
-	//// Temporary //////////////////////////////////////////////////////////////////////////////////////////
-
-	_forwards_velocity_smoothing.setMaxJerk(22);
-	_forwards_velocity_smoothing.setMaxAccel(2);
-	_forwards_velocity_smoothing.setMaxVel(4);
-
-	// const float velocity_error_sign = matrix::sign(velocity_error);
-	const float max_velocity = math::trajectory::computeMaxSpeedFromDistance(22, 1, distance_to_next_wp, 0.0f);
-
-	_forwards_velocity_smoothing.updateDurations(max_velocity);
-
-	_forwards_velocity_smoothing.updateTraj(_dt);
-
-	desired_linear_velocity = _forwards_velocity_smoothing.getCurrentVelocity();
-
-	// PX4_ERR("Test linear vel sp and real: %f %f", (double)desired_linear_velocity, (double)_forwards_velocity);
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	_input_feed_forward(0) = desired_linear_velocity;
-
-	_input_feed_forward(1) = desired_angular_rate;
 }
 
 //temporary
@@ -329,75 +289,6 @@ float RoverDriveControl::getDt()
 
 	return ((_current_timestamp - _last_timestamp)/1000000);
 }
-
-// float RoverDriveControl::computeAlignment(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint)
-// {
-//     matrix::Vector2f wanted_path = waypoint - previous_waypoint;
-//     matrix::Vector2f current_path = current_pos - previous_waypoint;
-
-//     // Normalize the vectors
-//     wanted_path.normalize();
-//     current_path.normalize();
-
-//     float result = -(1 - wanted_path.dot(current_path));
-
-//     // Check if result is finite, and return 0 if not
-//     if (!PX4_ISFINITE(result)) {
-//         return 0.0f;
-//     }
-
-//     return result;
-// }
-
-
-float RoverDriveControl::computeDesiredSpeed(float distance) {
-        // You may want to tune these parameters
-        float max_speed = 1.0;  // Max linear speed
-        float speed_scaling_factor = 1.0;  // How quickly the speed decreases with distance
-        return max_speed * std::exp(-speed_scaling_factor * distance);
-}
-
-// float RoverDriveControl::computeBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint) {
-//         float delta_x = waypoint(0) - current_pos(0);
-//         float delta_y = waypoint(1) - current_pos(1);
-//         return std::atan2(delta_y, delta_x);
-// }
-
-// float RoverDriveControl::computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint) {
-
-// 	// PX4_ERR("two waypoints: %f %f", (double)previous_waypoint(0), (double)previous_waypoint(1));
-
-//         matrix::Vector2f wanted_path = waypoint - previous_waypoint;
-// 	matrix::Vector2f current_path = current_pos - previous_waypoint;
-
-// 	// Normalize the vectors
-// 	matrix::Vector2f wanted_path_normalized = wanted_path;
-// 	matrix::Vector2f current_path_normalized = current_path;
-
-// 	wanted_path_normalized.normalize();
-// 	current_path_normalized.normalize();
-
-// 	float dot = wanted_path_normalized.dot(current_path_normalized);
-
-// 	float theta = acos(dot);
-
-// 	matrix::Vector2f p1 = wanted_path_normalized * cos(theta) * current_path.norm() + previous_waypoint;
-
-// 	matrix::Vector2f v1 = current_pos - p1;
-
-// 	matrix::Vector2f new_waypoint = -v1*10 + waypoint;
-
-// 	// PX4_ERR("two waypoints: %f %f and %f %f", (double)current_pos(0), (double)current_pos(1), (double)new_waypoint(0), (double)new_waypoint(1));
-
-// 	return computeBearing(current_pos, new_waypoint);
-// }
-
-// float RoverDriveControl::normalizeAngle(float angle) {
-// 	// wtf, i hope no one sees this for now lol
-//         while (angle > (float)M_PI) angle -= (float)2.0 * (float)M_PI;
-//         while (angle < -(float)M_PI) angle += (float)2.0 * (float)M_PI;
-//         return angle;
-// }
 
 void RoverDriveControl::publishRateControl()
 {
