@@ -209,6 +209,7 @@ bool Ekf::update()
 		predictState(imu_sample_delayed);
 
 		// control fusion of observation data
+		// change stuff in here
 		controlFusionModes(imu_sample_delayed);
 
 #if defined(CONFIG_EKF2_TERRAIN)

@@ -731,6 +731,7 @@ void EKF2::Run()
 		UpdateAirspeedSample(ekf2_timestamps);
 #endif // CONFIG_EKF2_AIRSPEED
 #if defined(CONFIG_EKF2_AUXVEL)
+// no need to really change much in here
 		UpdateAuxVelSample(ekf2_timestamps);
 #endif // CONFIG_EKF2_AUXVEL
 #if defined(CONFIG_EKF2_BAROMETER)
@@ -755,7 +756,7 @@ void EKF2::Run()
 
 		// run the EKF update and output
 		const hrt_abstime ekf_update_start = hrt_absolute_time();
-
+		// here we need to change stuff
 		if (_ekf.update()) {
 			perf_set_elapsed(_ecl_ekf_update_full_perf, hrt_elapsed_time(&ekf_update_start));
 
@@ -2116,6 +2117,9 @@ void EKF2::UpdateAirspeedSample(ekf2_timestamps_s &ekf2_timestamps)
 #if defined(CONFIG_EKF2_AUXVEL)
 void EKF2::UpdateAuxVelSample(ekf2_timestamps_s &ekf2_timestamps)
 {
+
+	// this is ok, no need to change much here, except we will not fuse angular velocity, rather we will be fusing the heading when we are not moving at 5hz, check a different example
+
 	// EKF auxiliary velocity sample
 	//  - use the landing target pose estimate as another source of velocity data
 	const unsigned last_generation = _landing_target_pose_sub.get_last_generation();

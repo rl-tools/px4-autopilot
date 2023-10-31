@@ -419,6 +419,9 @@ void EstimatorInterface::setExtVisionData(const extVisionSample &evdata)
 #if defined(CONFIG_EKF2_AUXVEL)
 void EstimatorInterface::setAuxVelData(const auxVelSample_rover &auxvel_sample)
 {
+
+	// this stuff is ok too, nothing to change
+
 	if (!_initialised) {
 		return;
 	}
