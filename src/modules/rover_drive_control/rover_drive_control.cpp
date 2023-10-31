@@ -116,7 +116,6 @@ void RoverDriveControl::Run()
 	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
 		subscribeManualControl();
 	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
-
 		subscribeAutoControl();
 	} else {
 		_input_pid = {0.0f, 0.0f};
@@ -171,6 +170,7 @@ void RoverDriveControl::subscribeAutoControl()
 
 	_input_feed_forward(0) = guidance_output(0);
 	_input_feed_forward(1) = guidance_output(1);
+
 
 }
 
@@ -228,7 +228,8 @@ void RoverDriveControl::encoder_data_poll()
 
 	}
 	else {
-		PX4_ERR("No encoder data received.");
+		// PX4_ERR("No encoder data received.");
+		return;
 	}
 }
 

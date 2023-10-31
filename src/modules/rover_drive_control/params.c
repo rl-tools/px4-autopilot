@@ -81,7 +81,7 @@ PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 4.0f);
  * @decimal 5
  * @group Rover Drive Control
  */
-PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 1.0f);
+PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 6.0f);
 
 
 
