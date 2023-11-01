@@ -18,7 +18,17 @@ matrix::Vector2f differential_drive_control_guidance::computeGuidance(const matr
 
 		float align_error = computeAlignment(_global_position, _current_waypoint, _previous_waypoint);
 
-		const float desired_angular_rate = _yaw_rate_point_pid.pid(heading_error, 0, _dt, 200, max_angular_velocity, true, 1.0, 0.05, 0.0) + _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, max_angular_velocity, true, 0.0, 0.0, 0.0);
+		const float desired_angular_rate =
+			_yaw_rate_point_pid.pid(
+				heading_error,
+				0,
+				_dt,
+				200,
+				max_angular_velocity,
+				true,
+				_param_rdc_p_gain_waypoint_controller.get(),
+				_param_rdc_d_gain_waypoint_controller.get(),
+				_param_rdc_i_gain_waypoint_controller.get()); /*+ _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, max_angular_velocity, true, 0.0, 0.0, 0.0);*/
 
 		// change this, make it a parameter or something
 		float desired_linear_velocity = max_forwards_velocity;
@@ -36,25 +46,21 @@ matrix::Vector2f differential_drive_control_guidance::computeGuidance(const matr
 
 		desired_linear_velocity = _forwards_velocity_smoothing.getCurrentVelocity();
 
-		desired_linear_velocity = desired_linear_velocity - (1-abs(align_error))*desired_linear_velocity*0.2f;
+		desired_linear_velocity = desired_linear_velocity - (1-abs(align_error))*desired_linear_velocity*_param_rdc_velocity_alignment_subtraction.get();
 
 		if(!PX4_ISFINITE(desired_linear_velocity) || desired_linear_velocity < 0){
 			desired_linear_velocity = 0;
 		}
 
-		// PX4_ERR("Alignment: %f", (double)align_error);
-
 		matrix::Vector2f output;
 
-		if ((_current_waypoint == _next_waypoint) && (double)distance_to_next_wp < 0.2) {
+		if ((_current_waypoint == _next_waypoint) && distance_to_next_wp < _param_rdc_accepted_waypoint_radius.get()) {
 
 			output(0) = 0;
 			output(1) = 0;
 		} else {
 			output(0) = desired_linear_velocity;
 			output(1) = desired_angular_rate;
-
-			// PX4_ERR("Desired linear and angular velocity %f %f", (double)desired_linear_velocity, (double)desired_angular_rate);
 		}
 
 		return output;
@@ -62,8 +68,6 @@ matrix::Vector2f differential_drive_control_guidance::computeGuidance(const matr
 
 
 float differential_drive_control_guidance::computeAdvancedBearing(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint) {
-
-		// PX4_ERR("two waypoints: %f %f", (double)previous_waypoint(0), (double)previous_waypoint(1));
 
 		matrix::Vector2f wanted_path = waypoint - previous_waypoint;
 		matrix::Vector2f current_path = current_pos - previous_waypoint;
@@ -84,8 +88,6 @@ float differential_drive_control_guidance::computeAdvancedBearing(const matrix::
 		matrix::Vector2f v1 = current_pos - p1;
 
 		matrix::Vector2f new_waypoint = -v1*10 + waypoint;
-
-		// PX4_ERR("two waypoints: %f %f and %f %f", (double)current_pos(0), (double)current_pos(1), (double)new_waypoint(0), (double)new_waypoint(1));
 
 		return computeBearing(current_pos, new_waypoint);
 }

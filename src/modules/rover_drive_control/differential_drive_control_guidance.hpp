@@ -50,7 +50,7 @@
 class differential_drive_control_guidance : public ModuleParams
 {
 public:
-	differential_drive_control_guidance() : ModuleParams(this) {};
+	differential_drive_control_guidance(ModuleParams *parent) : ModuleParams(parent) {};
 	~differential_drive_control_guidance() = default;
 
 	matrix::Vector2f 	computeGuidance(const matrix::Vector2f& current_pos, const matrix::Vector2f& waypoint, const matrix::Vector2f& previous_waypoint, const matrix::Vector2f& next_waypoint, float vehicle_yaw, float dt, float max_forwards_velocity, float max_angular_velocity);
@@ -79,5 +79,14 @@ private:
 	rover_drive_control_pid 		_yaw_rate_point_pid;
 	rover_drive_control_pid 		_yaw_rate_align_pid;
 	rover_drive_control_pid 		_speed_control_pid;
+
+	DEFINE_PARAMETERS(
+		(ParamFloat<px4::params::RDC_P_GAIN_WC>) _param_rdc_p_gain_waypoint_controller,
+		(ParamFloat<px4::params::RDC_I_GAIN_WC>) _param_rdc_d_gain_waypoint_controller,
+		(ParamFloat<px4::params::RDC_D_GAIN_WC>) _param_rdc_i_gain_waypoint_controller,
+		(ParamFloat<px4::params::NAV_ACC_RAD>) _param_rdc_accepted_waypoint_radius,
+		(ParamFloat<px4::params::RDC_VEL_ALGN>) _param_rdc_velocity_alignment_subtraction
+
+	)
 
 };

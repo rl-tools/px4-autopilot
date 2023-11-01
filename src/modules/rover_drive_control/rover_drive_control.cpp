@@ -41,7 +41,8 @@ namespace rover_drive_control
 
 RoverDriveControl::RoverDriveControl() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::lp_default)
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::lp_default),
+	_differential_guidance_controller(this)
 {
 	_differential_drive_control_pub.advertise();
 	_last_timestamp = hrt_absolute_time();
@@ -110,6 +111,7 @@ void RoverDriveControl::Run()
 		_parameter_update_sub.copy(&pupdate);
 
 		// update parameters from storage
+		PX4_ERR("I am updating my params");
 		updateParams();
 	}
 
@@ -166,7 +168,18 @@ void RoverDriveControl::subscribeAutoControl()
 
 	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
 
-	matrix::Vector2f guidance_output = _differential_guidance_controller.computeGuidance(_global_position, _current_waypoint, _previous_waypoint, _next_waypoint, vehicle_yaw, _dt, _param_rdc_max_forwards_velocity.get(), _param_rdc_max_angular_velocity.get());
+	matrix::Vector2f guidance_output =
+		_differential_guidance_controller.computeGuidance(
+			_global_position,
+			_current_waypoint,
+			_previous_waypoint,
+			_next_waypoint,
+			vehicle_yaw,
+			_dt,
+			_param_rdc_max_forwards_velocity.get(),
+			_param_rdc_max_angular_velocity.get()
+		);
+
 
 	_input_feed_forward(0) = guidance_output(0);
 	_input_feed_forward(1) = guidance_output(1);
@@ -176,7 +189,6 @@ void RoverDriveControl::subscribeAutoControl()
 
 float RoverDriveControl::getDt()
 {
-
 	return ((_current_timestamp - _last_timestamp)/1000000);
 }
 

@@ -1,6 +1,6 @@
 #include "rover_drive_control_pid.hpp"
 
-float rover_drive_control_pid::pid(float reference, float actual, float dt, float windup, float saturation, bool normalized, float kp, float ki, float kd)
+float rover_drive_control_pid::pid(float reference, float actual, float dt, float windup, float saturation, bool useReferenceAsError, float kp, float ki, float kd)
 {
 	_reference = reference;
 	_actual = actual;
@@ -11,24 +11,18 @@ float rover_drive_control_pid::pid(float reference, float actual, float dt, floa
 	_ki = ki;
 	_kd = kd;
 
-	if(normalized){
-		_error = reference;
-	} else {
-		_error = (_reference - _actual);
-	}
+	_error = useReferenceAsError ? reference : (reference - actual);
 
-	if(abs(_error) > 1000){
+	if(!PX4_ISFINITE(_error)){
 		_error = 0;
 	}
 
 	_p_error = _error;
 
-	if(!PX4_ISFINITE(_p_error)){
-		_p_error = 0;
-	}
-
 	if((_i_error < _antireset_windup) && _previous_output < saturation){
 		_i_error += _error*_dt;
+	} else {
+		_i_error += 0;
 	}
 
 	if(!PX4_ISFINITE(_i_error)){
@@ -46,5 +40,4 @@ float rover_drive_control_pid::pid(float reference, float actual, float dt, floa
 	_previous_output = output;
 
 	return math::constrain(output, -saturation, saturation);
-
 }

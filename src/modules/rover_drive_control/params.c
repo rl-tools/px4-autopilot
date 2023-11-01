@@ -83,5 +83,52 @@ PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 4.0f);
  */
 PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 6.0f);
 
+/**
+ * P Gain Waypoint Controller
+ *
+ *
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_P_GAIN_WC, 1.0f);
+
+/**
+ * I Gain Waypoint Controller
+ *
+ *
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_I_GAIN_WC, 0.0f);
+
+/**
+ * D Gain Waypoint Controller
+ *
+ *
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_D_GAIN_WC, 0.0f);
+
+/**
+ * Waypoint alignment velocity subtraction
+ *
+ *
+ * @min 0.0
+ * @max 1
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_VEL_ALGN, 0.2f);
 
 

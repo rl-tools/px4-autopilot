@@ -48,7 +48,7 @@ public:
 	rover_drive_control_pid() : ModuleParams(this) {};
 	~rover_drive_control_pid() = default;
 
-	float pid(float reference, float actual, float dt, float windup, float saturation, bool normalized, float kp, float ki, float kd);
+	float pid(float reference, float actual, float dt, float windup, float saturation, bool useReferenceAsError, float kp, float ki, float kd);
 
 private:
 
