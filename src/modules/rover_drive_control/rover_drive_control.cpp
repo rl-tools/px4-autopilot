@@ -42,6 +42,7 @@ namespace rover_drive_control
 RoverDriveControl::RoverDriveControl() :
 	ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::lp_default),
+	_differential_kinematics_controller(this),
 	_differential_guidance_controller(this)
 {
 	_differential_drive_control_pub.advertise();
@@ -93,13 +94,11 @@ void RoverDriveControl::Run()
 		if (_vehicle_status_sub.copy(&vehicle_status)) {
 			if (_arming_state != vehicle_status.arming_state) {
 				_arming_state = vehicle_status.arming_state;
-
 			}
 			bool system_calibrating = vehicle_status.calibration_enabled;
 
 			if (system_calibrating != _system_calibrating) {
 				_system_calibrating = system_calibrating;
-
 			}
 		}
 	}
