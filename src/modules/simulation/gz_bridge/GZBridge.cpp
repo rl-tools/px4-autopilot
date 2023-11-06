@@ -766,14 +766,17 @@ void GZBridge::encoderDataPub()
 {
 	// temporary, change this hardcoded encoder size
 
+	_wheel_encoders_msg.timestamp = hrt_absolute_time();
+
+
 	for (int i = 0; i < 4; i++) {
-		_wheelEncoderMsg[i].timestamp = hrt_absolute_time();
 
-		_wheelEncoderMsg[i].encoder_position = _encoderCounts[i];
-		_wheelEncoderMsg[i].speed = _motorSpeeds[i];
+		_wheel_encoders_msg.wheel_angle[i] =  _encoderCounts[i];
+		_wheel_encoders_msg.wheel_speed[i] = _motorSpeeds[i];
 
-		_wheelEncodersAdv[i].publish(_wheelEncoderMsg[i]);
 	}
+
+	_wheel_encoders_pub.publish(_wheel_encoders_msg);
 
 }
 

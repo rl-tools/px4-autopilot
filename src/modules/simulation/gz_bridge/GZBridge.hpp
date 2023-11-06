@@ -127,15 +127,14 @@ private:
 
 
 
-	uORB::PublicationMulti<wheel_encoders_s> _wheelEncodersAdv[4] { ORB_ID(wheel_encoders), ORB_ID(wheel_encoders), ORB_ID(wheel_encoders), ORB_ID(wheel_encoders)};
+	uORB::Publication<wheel_encoders_s> _wheel_encoders_pub{ORB_ID(wheel_encoders)};
 
-	// gz::transport::Node::Subscriber _encoder_sub;
 
-	wheel_encoders_s 			_wheelEncoderMsg[4];
+	wheel_encoders_s 			_wheel_encoders_msg;
 
-	uint32_t _lastEncoderCount[4] {0, 0, 0, 0};
-	int64_t _encoderCounts[4] {0, 0, 0, 0};
-	int32_t _motorSpeeds[4] {0, 0, 0, 0};
+	float _lastEncoderCount[4] = {0.0, 0.0, 0.0, 0.0};
+	float _encoderCounts[4] = {0.0, 0.0, 0.0, 0.0};
+	float _motorSpeeds[4] = {0.0, 0.0, 0.0, 0.0};
 
 	void encoderCallback();
 	void encoderDataPub();

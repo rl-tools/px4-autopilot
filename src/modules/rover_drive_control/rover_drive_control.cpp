@@ -220,10 +220,10 @@ void RoverDriveControl::encoder_data_poll()
 		auto &sub = _wheel_encoders_sub[i];
 		if (sub.update(&_wheel_encoder)) {
 		if (i < 2) {  // Assuming first two encoders are for the right side
-			sum_right_encoders_speed += _wheel_encoder.speed;
+			sum_right_encoders_speed += _wheel_encoder.wheel_speed[i];
 			count_right_encoders++;
 		} else {  // Assuming the last two encoders are for the left side
-			sum_left_encoders_speed += _wheel_encoder.speed;
+			sum_left_encoders_speed += _wheel_encoder.wheel_speed[i];
 			count_left_encoders++;
 		}
 		}
