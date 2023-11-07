@@ -41,9 +41,6 @@ bool GZMixingInterfaceESC::init(const std::string &model_name)
 
 	std::cout << "Motor speed topic: " << motor_speed_topic << std::endl;
 
-	std::cout << "Motor speed topic: YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO " << motor_speed_topic << std::endl;
-
-
 	if (!_node.Subscribe(motor_speed_topic, &GZMixingInterfaceESC::motorSpeedCallback, this)) {
 		PX4_ERR("failed to subscribe to %s", motor_speed_topic.c_str());
 		return false;
@@ -84,7 +81,10 @@ bool GZMixingInterfaceESC::updateOutputs(bool stop_motors, uint16_t outputs[MAX_
 		rotor_velocity_message.mutable_velocity()->Resize(active_output_count, 0);
 
 		for (unsigned i = 0; i < active_output_count; i++) {
-			rotor_velocity_message.set_velocity(i, outputs[i]);
+			//perfrivik
+			float output_scaler = 100;
+			float scaled_output = outputs[i] - output_scaler;
+			rotor_velocity_message.set_velocity(i, scaled_output);
 		}
 
 		if (_actuators_pub.Valid()) {

@@ -68,7 +68,7 @@ PARAM_DEFINE_FLOAT(RDC_WHEEL_RADIUS, 0.0686f);
  * @decimal 5
  * @group Rover Drive Control
  */
-PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 0.1f);
+PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 1.0f);
 
 /**
  * Max Angular Velocity
@@ -81,7 +81,7 @@ PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 0.1f);
  * @decimal 5
  * @group Rover Drive Control
  */
-PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 0.1f);
+PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 1.0f);
 
 /**
  * P Gain Waypoint Controller
