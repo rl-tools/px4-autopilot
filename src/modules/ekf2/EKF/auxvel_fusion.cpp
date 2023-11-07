@@ -33,22 +33,18 @@
 
 #include "ekf.h"
 
-#if defined(CONFIG_EKF2_AUXVEL)
-
 void Ekf::controlAuxVelFusion()
 {
 	if (_auxvel_buffer) {
-		auxVelSample_rover auxvel_sample_delayed;
+		auxVelSample auxvel_sample_delayed;
 
 		if (_auxvel_buffer->pop_first_older_than(_time_delayed_us, &auxvel_sample_delayed)) {
 
 			resetEstimatorAidStatus(_aid_src_aux_vel);
 
-			// update this make 2 (vel 2d vec)(1d angular), this all needs to be written for body frame + add body frame to enum of auxvelsample, here we also need to add the generated functions
-			updateVelocityAidSrcStatus(auxvel_sample_delayed.time_us, auxvel_sample_delayed.linvel, auxvel_sample_delayed.linvelVar, fmaxf(_params.auxvel_gate, 1.f), _aid_src_aux_vel);
+			updateVelocityAidSrcStatus(auxvel_sample_delayed.time_us, auxvel_sample_delayed.vel, auxvel_sample_delayed.velVar, fmaxf(_params.auxvel_gate, 1.f), _aid_src_aux_vel);
 
 			if (isHorizontalAidingActive()) {
-				//create own fuse angular vel
 				fuseVelocity(_aid_src_aux_vel);
 			}
 		}
@@ -61,4 +57,3 @@ void Ekf::stopAuxVelFusion()
 	//_control_status.flags.aux_vel = false;
 	resetEstimatorAidStatus(_aid_src_aux_vel);
 }
-#endif // CONFIG_EKF2_AUXVEL

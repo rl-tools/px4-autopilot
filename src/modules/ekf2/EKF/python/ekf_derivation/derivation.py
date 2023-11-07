@@ -390,48 +390,6 @@ def compute_mag_z_innov_var_and_h(
 
     return (innov_var, H.T)
 
-# read again perfrivik
-def compute_body_vel_innov_var_and_hx(
-        state: VState,
-        P: MTangent,
-        R: sf.Scalar,
-        epsilon: sf.Scalar
-) -> (sf.Scalar, VTangent):
-
-    state = State.from_storage(state)
-    R_to_earth = state_to_rot3(state)
-    body_vel_pred = R_to_earth * state["vel"]
-
-    innov_var = sf.V2()
-    Hx = sf.V1(body_vel_pred[0]).jacobian(state, tangent_space=False)
-    Hy = sf.V1(body_vel_pred[1]).jacobian(state, tangent_space=False)
-
-    innov_var[0] = (Hx * P * Hx.T + R)[0,0]
-    innov_var[1] = (Hy * P * Hy.T + R)[0,0]
-
-    return (innov_var, Hx.T)
-
-def compute_body_y_vel_innov_var_and_h(
-        state: VState,
-        P: MTangent,
-        R: sf.Scalar,
-        epsilon: sf.Scalar
-) -> (sf.Scalar, VTangent):
-
-    state = State.from_storage(state)
-    R_to_earth = state_to_rot3(state)
-    body_vel_pred = R_to_earth * state["vel"]
-
-    # innov_var = sf.V1()
-    # Hx = sf.V1(body_vel_pred[0]).jacobian(state, tangent_space=False)
-    Hy = sf.V1(body_vel_pred[1]).jacobian(state, tangent_space=False)
-
-    # innov_var[0] = (Hx * P * Hx.T + R)[0,0]
-    innov_var = (Hy * P * Hy.T + R)[0,0]
-
-    return (innov_var, Hy.T)
-
-
 def compute_yaw_321_innov_var_and_h(
         state: VState,
         P: MTangent,
@@ -705,10 +663,5 @@ generate_px4_function(compute_flow_xy_innov_var_and_hx, output_names=["innov_var
 generate_px4_function(compute_flow_y_innov_var_and_h, output_names=["innov_var", "H"])
 generate_px4_function(compute_gnss_yaw_pred_innov_var_and_h, output_names=["meas_pred", "innov_var", "H"])
 generate_px4_function(compute_gravity_innov_var_and_k_and_h, output_names=["innov", "innov_var", "Kx", "Ky", "Kz"])
-generate_px4_function(quat_var_to_rot_var, output_names=["rot_var"])
-generate_px4_function(rot_var_ned_to_lower_triangular_quat_cov, output_names=["q_cov_lower_triangle"])
-generate_px4_function(compute_body_vel_innov_var_and_hx, output_names=["innov_var", "Hx"])
-generate_px4_function(compute_body_y_vel_innov_var_and_h, output_names=["innov_var", "H"])
-
 
 generate_px4_state(State, tangent_idx)
