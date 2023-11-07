@@ -180,7 +180,9 @@ private:
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::RDC_MAX_FORW_VEL>) _param_rdc_max_forwards_velocity,
-		(ParamFloat<px4::params::RDC_MAX_ANG_VEL>) _param_rdc_max_angular_velocity
+		(ParamFloat<px4::params::RDC_MAX_ANG_VEL>) _param_rdc_max_angular_velocity,
+		(ParamFloat<px4::params::RDC_WHEEL_BASE>) _param_rdc_wheel_base,
+		(ParamFloat<px4::params::RDC_WHEEL_RADIUS>) _param_rdc_wheel_radius
 	)
 
 };

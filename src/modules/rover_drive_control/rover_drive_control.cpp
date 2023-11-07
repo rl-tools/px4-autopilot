@@ -206,9 +206,12 @@ void RoverDriveControl::publishRateControl()
 
 	// _differential_drive_control_pub.publish(diff_drive_control);
 
+	// Superpose Linear and Angular velocity vector
+	float max_angular_wheel_speed = ((_param_rdc_max_forwards_velocity.get() + (_param_rdc_max_angular_velocity.get()*_param_rdc_wheel_base.get()/2)) / _param_rdc_wheel_radius.get());
+
 	vehicle_thrust_setpoint_s v_thrust_sp{};
 	v_thrust_sp.timestamp = hrt_absolute_time();
-	v_thrust_sp.xyz[0] = _output_inverse(0)/60;
+	v_thrust_sp.xyz[0] = _output_inverse(0)/max_angular_wheel_speed;
 	v_thrust_sp.xyz[1] = 0.0f;
 	v_thrust_sp.xyz[2] = 0.0f;
 	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
@@ -217,7 +220,7 @@ void RoverDriveControl::publishRateControl()
 	v_torque_sp.timestamp = hrt_absolute_time();
 	v_torque_sp.xyz[0] = 0.f;
 	v_torque_sp.xyz[1] = 0.f;
-	v_torque_sp.xyz[2] = _output_inverse(1)/60;
+	v_torque_sp.xyz[2] = _output_inverse(1)/max_angular_wheel_speed;
 	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
 
 }
