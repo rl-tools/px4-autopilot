@@ -41,11 +41,12 @@ namespace rover_drive_control
 
 RoverDriveControl::RoverDriveControl() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::lp_default),
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl),
 	_differential_kinematics_controller(this),
 	_differential_guidance_controller(this)
 {
 	_differential_drive_control_pub.advertise();
+	_vehicle_thrust_setpoint_pub.advertise();
 	_last_timestamp = hrt_absolute_time();
 }
 
@@ -193,17 +194,31 @@ float RoverDriveControl::getDt()
 
 void RoverDriveControl::publishRateControl()
 {
-	differential_drive_control_s diff_drive_control{};
+	// differential_drive_control_s diff_drive_control{};
 
-	diff_drive_control.motor_control[0] = _output_inverse(0);
-	diff_drive_control.motor_control[1] = _output_inverse(1);
+	// diff_drive_control.motor_control[0] = _output_inverse(0);
+	// diff_drive_control.motor_control[1] = _output_inverse(1);
 
-	diff_drive_control.linear_velocity[0] = _output_forwards(0);
-	diff_drive_control.angular_velocity[2] = _output_forwards(1);
+	// diff_drive_control.linear_velocity[0] = _output_forwards(0);
+	// diff_drive_control.angular_velocity[2] = _output_forwards(1);
 
-	diff_drive_control.timestamp = hrt_absolute_time();
+	// diff_drive_control.timestamp = hrt_absolute_time();
 
-	_differential_drive_control_pub.publish(diff_drive_control);
+	// _differential_drive_control_pub.publish(diff_drive_control);
+
+	vehicle_thrust_setpoint_s v_thrust_sp{};
+	v_thrust_sp.timestamp = hrt_absolute_time();
+	v_thrust_sp.xyz[0] = _output_inverse(0)/60;
+	v_thrust_sp.xyz[1] = 0.0f;
+	v_thrust_sp.xyz[2] = 0.0f;
+	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
+
+	vehicle_torque_setpoint_s v_torque_sp{};
+	v_torque_sp.timestamp = hrt_absolute_time();
+	v_torque_sp.xyz[0] = 0.f;
+	v_torque_sp.xyz[1] = 0.f;
+	v_torque_sp.xyz[2] = _output_inverse(1)/60;
+	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
 
 }
 
@@ -281,7 +296,7 @@ void RoverDriveControl::vehicle_attitude_poll()
 
 void RoverDriveControl::start()
 {
-	ScheduleOnInterval(10_ms); // 100 Hz
+	ScheduleOnInterval(1_ms); // 100 Hz
 }
 
 int RoverDriveControl::print_status()

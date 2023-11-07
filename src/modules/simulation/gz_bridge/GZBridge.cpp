@@ -130,8 +130,8 @@ int GZBridge::init()
 
 	// temporary perfrivik
 
-	std::string actuator_topic = "/model/" + _model_name + "/command/motor_speed";
-	_actuators_pub = _node.Advertise<gz::msgs::Actuators>(actuator_topic);
+	// std::string actuator_topic = "/model/" + _model_name + "/command/motor_speed";
+	// _actuators_pub = _node.Advertise<gz::msgs::Actuators>(actuator_topic);
 
 	// encoder data temporary
 	std::string encoder_topic = "/world/" + _world_name + "/model/" + _model_name + "/joint_state";
@@ -198,15 +198,15 @@ int GZBridge::init()
 
 	// perfrivik temporary
 
-	// if (!_mixing_interface_esc.init(_model_name)) {
-	// 	PX4_ERR("failed to init ESC output");
-	// 	return PX4_ERROR;
-	// }
+	if (!_mixing_interface_esc.init(_model_name)) {
+		PX4_ERR("failed to init ESC output");
+		return PX4_ERROR;
+	}
 
-	// if (!_mixing_interface_servo.init(_model_name)) {
-	// 	PX4_ERR("failed to init servo output");
-	// 	return PX4_ERROR;
-	// }
+	if (!_mixing_interface_servo.init(_model_name)) {
+		PX4_ERR("failed to init servo output");
+		return PX4_ERROR;
+	}
 
 	ScheduleNow();
 	return OK;

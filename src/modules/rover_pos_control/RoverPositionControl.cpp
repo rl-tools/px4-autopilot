@@ -384,6 +384,9 @@ RoverPositionControl::Run()
 	/* run controller on gyro changes */
 	vehicle_angular_velocity_s angular_velocity;
 
+	printf("Am I running?\n");
+
+
 	if (_vehicle_angular_velocity_sub.update(&angular_velocity)) {
 
 		/* check vehicle control mode for changes to publication state */

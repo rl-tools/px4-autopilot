@@ -44,8 +44,8 @@ ActuatorEffectivenessRoverDifferential::getEffectivenessMatrix(Configuration &co
 		return false;
 	}
 
-	configuration.addActuator(ActuatorType::MOTORS, Vector3f{0.f, 0.f, 0.5f}, Vector3f{0.5f, 0.f, 0.f});
-	configuration.addActuator(ActuatorType::MOTORS, Vector3f{0.f, 0.f, -0.5f}, Vector3f{0.5f, 0.f, 0.f});
+	configuration.addActuator(ActuatorType::MOTORS, Vector3f{0.f, 0.f, 0.0f}, Vector3f{1.0f, 0.f, 0.f});
+	configuration.addActuator(ActuatorType::MOTORS, Vector3f{0.f, 0.f, 1.0f}, Vector3f{0.0f, 0.f, 0.f});
 	_motors_mask = (1u << 0) | (1u << 1);
 	return true;
 }

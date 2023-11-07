@@ -41,6 +41,9 @@ bool GZMixingInterfaceESC::init(const std::string &model_name)
 
 	std::cout << "Motor speed topic: " << motor_speed_topic << std::endl;
 
+	std::cout << "Motor speed topic: YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO " << motor_speed_topic << std::endl;
+
+
 	if (!_node.Subscribe(motor_speed_topic, &GZMixingInterfaceESC::motorSpeedCallback, this)) {
 		PX4_ERR("failed to subscribe to %s", motor_speed_topic.c_str());
 		return false;
