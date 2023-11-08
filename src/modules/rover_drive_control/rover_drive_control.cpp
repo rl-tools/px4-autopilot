@@ -115,10 +115,9 @@ void RoverDriveControl::Run()
 	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
 		if (_manual_control_setpoint_sub.updated()) {
 			manual_control_setpoint_s manual_control_setpoint{};
-			if (_manual_control_setpoint_sub.updated()) {
-				_input_feed_forward(0) = manual_control_setpoint.throttle*_param_rdc_max_forwards_velocity.get();
-				_input_feed_forward(1) = manual_control_setpoint.roll*_param_rdc_max_angular_velocity.get();
-			}
+			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
+			_input_feed_forward(0) = manual_control_setpoint.throttle*_param_rdc_max_forwards_velocity.get();
+			_input_feed_forward(1) = manual_control_setpoint.roll*_param_rdc_max_angular_velocity.get();
 		}
 
 
@@ -199,8 +198,6 @@ void RoverDriveControl::publishRateControl()
 	_actuator_motors.reversible_flags = 3;
 	_actuator_motors.control[0] = _output_inverse(0)/max_angular_wheel_speed;
 	_actuator_motors.control[1] = _output_inverse(1)/max_angular_wheel_speed;
-
-	// printf("Publishing %f %f \n", (double)_actuator_motors.output[0], (double)_actuator_motors.output[1]);
 
 	_outputs_pub.publish(_actuator_motors);
 

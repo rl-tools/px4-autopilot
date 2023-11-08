@@ -136,7 +136,7 @@ PARAM_DEFINE_FLOAT(RDC_VEL_ALGN, 0.2f);
  * Max linear velocity Jerk
  *
  *
- * @unit m/s3
+ * @unit m/s^3
  * @min 0.0
  * @max 100
  * @increment 0.001
@@ -149,7 +149,7 @@ PARAM_DEFINE_FLOAT(RDC_MAX_JERK, 22.f);
  * Max linear acceleration
  *
  *
- * @unit m/s2
+ * @unit m/s^2
  * @min 0.0
  * @max 100
  * @increment 0.001
