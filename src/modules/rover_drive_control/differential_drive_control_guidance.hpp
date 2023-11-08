@@ -85,8 +85,10 @@ private:
 		(ParamFloat<px4::params::RDC_I_GAIN_WC>) _param_rdc_d_gain_waypoint_controller,
 		(ParamFloat<px4::params::RDC_D_GAIN_WC>) _param_rdc_i_gain_waypoint_controller,
 		(ParamFloat<px4::params::NAV_ACC_RAD>) _param_rdc_accepted_waypoint_radius,
-		(ParamFloat<px4::params::RDC_VEL_ALGN>) _param_rdc_velocity_alignment_subtraction
-
+		(ParamFloat<px4::params::RDC_VEL_ALGN>) _param_rdc_velocity_alignment_subtraction,
+		(ParamFloat<px4::params::RDC_MAX_JERK>) _param_rdc_max_jerk,
+		(ParamFloat<px4::params::RDC_MAX_ACCEL>) _param_rdc_max_acceleration,
+		(ParamFloat<px4::params::RDC_WP_VEL>) _param_rdc_waypoing_min_vel
 	)
 
 };

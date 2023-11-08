@@ -81,11 +81,11 @@ bool GZMixingInterfaceESC::updateOutputs(bool stop_motors, uint16_t outputs[MAX_
 		rotor_velocity_message.mutable_velocity()->Resize(active_output_count, 0);
 
 		for (unsigned i = 0; i < active_output_count; i++) {
-			//perfrivik
-			float output_scaler = 100;
-			float scaled_output = outputs[i] - output_scaler;
+			float output_scaler = 100.0f;
+			float scaled_output = (float)outputs[i] - output_scaler;
 			rotor_velocity_message.set_velocity(i, scaled_output);
 		}
+
 
 		if (_actuators_pub.Valid()) {
 			return _actuators_pub.Publish(rotor_velocity_message);

@@ -15,7 +15,7 @@ ekf2 start &
 #
 # Start Control Allocator
 #
-control_allocator start
+# control_allocator start
 
 #
 # Start attitude controllers.

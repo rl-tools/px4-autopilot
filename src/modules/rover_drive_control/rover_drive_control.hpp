@@ -44,6 +44,7 @@
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 
 #include <uORB/topics/actuator_outputs.h>
+#include <uORB/topics/actuator_motors.h>
 #include <uORB/PublicationMulti.hpp>
 
 // //temporary
@@ -83,7 +84,7 @@ class RoverDriveControl : public ModuleBase<RoverDriveControl>, public ModulePar
 {
 public:
 	RoverDriveControl();
-	~RoverDriveControl() override;
+	~RoverDriveControl() override = default;
 
 	static int task_spawn(int argc, char *argv[]);
 
@@ -122,7 +123,7 @@ private:
 	float computeDesiredSpeed(float distance);
 
 	uORB::Publication<differential_drive_control_s> _differential_drive_control_pub{ORB_ID(differential_drive_control)};
-	uORB::PublicationMulti<actuator_outputs_s> _outputs_pub{ORB_ID(actuator_outputs)};
+	uORB::PublicationMulti<actuator_motors_s> _outputs_pub{ORB_ID(actuator_motors)};
 	uORB::Publication<vehicle_thrust_setpoint_s>	_vehicle_thrust_setpoint_pub{ORB_ID(vehicle_thrust_setpoint)};
 	uORB::Publication<vehicle_torque_setpoint_s>	_vehicle_torque_setpoint_pub{ORB_ID(vehicle_torque_setpoint)};
 
@@ -140,7 +141,7 @@ private:
 	differential_drive_control_s 		_diff_drive_control{};
 	manual_control_setpoint_s		_manual_control_setpoint{};
 	vehicle_control_mode_s			_control_mode{};
-	actuator_outputs_s 			_actuator_outputs{};
+	actuator_motors_s 			_actuator_motors{};
 	position_setpoint_triplet_s 		_pos_sp_triplet{};
 	vehicle_global_position_s		_global_pos{};
 	vehicle_local_position_s		_local_pos{};

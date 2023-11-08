@@ -30,22 +30,18 @@ matrix::Vector2f differential_drive_control_guidance::computeGuidance(const matr
 				_param_rdc_d_gain_waypoint_controller.get(),
 				_param_rdc_i_gain_waypoint_controller.get()); /*+ _yaw_rate_align_pid.pid(align_error, 0, _dt, 200, max_angular_velocity, true, 0.0, 0.0, 0.0);*/
 
-		// change this, make it a parameter or something
 		float desired_linear_velocity = max_forwards_velocity;
 
 		// initialize this at the start of the function and get parameters
-		_forwards_velocity_smoothing.setMaxJerk(22);
-		_forwards_velocity_smoothing.setMaxAccel(1);
+		// not quite sure about this section, subject to change
+		_forwards_velocity_smoothing.setMaxJerk(_param_rdc_max_jerk.get());
+		_forwards_velocity_smoothing.setMaxAccel(_param_rdc_max_acceleration.get());
 		_forwards_velocity_smoothing.setMaxVel(max_forwards_velocity);
-
-		const float max_velocity = math::trajectory::computeMaxSpeedFromDistance(22, 1, distance_to_next_wp, 0.0f);
-
+		const float max_velocity = math::trajectory::computeMaxSpeedFromDistance(_param_rdc_max_jerk.get(), _param_rdc_max_acceleration.get(), distance_to_next_wp, _param_rdc_waypoing_min_vel.get());
 		_forwards_velocity_smoothing.updateDurations(max_velocity);
-
 		_forwards_velocity_smoothing.updateTraj(_dt);
 
 		desired_linear_velocity = _forwards_velocity_smoothing.getCurrentVelocity();
-
 		desired_linear_velocity = desired_linear_velocity - (1-abs(align_error))*desired_linear_velocity*_param_rdc_velocity_alignment_subtraction.get();
 
 		if(!PX4_ISFINITE(desired_linear_velocity) || desired_linear_velocity < 0){
@@ -54,6 +50,7 @@ matrix::Vector2f differential_drive_control_guidance::computeGuidance(const matr
 
 		matrix::Vector2f output;
 
+		// logic to stop at the last waypoint
 		if ((_current_waypoint == _next_waypoint) && distance_to_next_wp < _param_rdc_accepted_waypoint_radius.get()) {
 
 			output(0) = 0;
@@ -80,14 +77,11 @@ float differential_drive_control_guidance::computeAdvancedBearing(const matrix::
 		current_path_normalized.normalize();
 
 		float dot = wanted_path_normalized.dot(current_path_normalized);
-
 		float theta = acos(dot);
 
 		matrix::Vector2f p1 = wanted_path_normalized * cos(theta) * current_path.norm() + previous_waypoint;
-
 		matrix::Vector2f v1 = current_pos - p1;
-
-		matrix::Vector2f new_waypoint = -v1*10 + waypoint;
+		matrix::Vector2f new_waypoint = -v1 + waypoint;
 
 		return computeBearing(current_pos, new_waypoint);
 }

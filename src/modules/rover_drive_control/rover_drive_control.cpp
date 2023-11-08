@@ -47,11 +47,8 @@ RoverDriveControl::RoverDriveControl() :
 {
 	_differential_drive_control_pub.advertise();
 	_vehicle_thrust_setpoint_pub.advertise();
+	_outputs_pub.advertise();
 	_last_timestamp = hrt_absolute_time();
-}
-
-RoverDriveControl::~RoverDriveControl()
-{
 }
 
 int RoverDriveControl::task_spawn(int argc, char *argv[])
@@ -111,27 +108,26 @@ void RoverDriveControl::Run()
 		_parameter_update_sub.copy(&pupdate);
 
 		// update parameters from storage
-		PX4_ERR("I am updating my params");
 		updateParams();
 	}
+
 
 	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
 		subscribeManualControl();
 	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
 		subscribeAutoControl();
 	} else {
+		// if the system is in an error state, stop the vehicle
 		_input_pid = {0.0f, 0.0f};
 		_input_feed_forward = {0.0f, 0.0f};
 	}
 
-	/////// Fix this section, does not work well with the inverse bool
+	// get the wheel speeds from the inverse kinematics class (differential_drive_control_kinematics)
 	_differential_kinematics_controller.setInput(_input_feed_forward + _input_pid, true);
-
 	_output_inverse = _differential_kinematics_controller.getOutput(true);
 
+	// publish data to actuator_motors (output module)
 	publishRateControl();
-
-	//////////////////////////////////////////////////////////////////
 
 	_last_timestamp = _current_timestamp;
 
@@ -157,6 +153,7 @@ void RoverDriveControl::subscribeAutoControl()
 	_current_waypoint(0) = _pos_sp_triplet.current.lat;
 	_current_waypoint(1) = _pos_sp_triplet.current.lon;
 
+	// edge case when system is initialized and there is no previous waypoint
 	if(!PX4_ISFINITE(_pos_sp_triplet.previous.lat) && !_first_waypoint_intialized){
 		_previous_waypoint(0) = _global_position(0);
 		_previous_waypoint(1) = _global_position(1);
@@ -194,34 +191,18 @@ float RoverDriveControl::getDt()
 
 void RoverDriveControl::publishRateControl()
 {
-	// differential_drive_control_s diff_drive_control{};
-
-	// diff_drive_control.motor_control[0] = _output_inverse(0);
-	// diff_drive_control.motor_control[1] = _output_inverse(1);
-
-	// diff_drive_control.linear_velocity[0] = _output_forwards(0);
-	// diff_drive_control.angular_velocity[2] = _output_forwards(1);
-
-	// diff_drive_control.timestamp = hrt_absolute_time();
-
-	// _differential_drive_control_pub.publish(diff_drive_control);
 
 	// Superpose Linear and Angular velocity vector
 	float max_angular_wheel_speed = ((_param_rdc_max_forwards_velocity.get() + (_param_rdc_max_angular_velocity.get()*_param_rdc_wheel_base.get()/2)) / _param_rdc_wheel_radius.get());
 
-	vehicle_thrust_setpoint_s v_thrust_sp{};
-	v_thrust_sp.timestamp = hrt_absolute_time();
-	v_thrust_sp.xyz[0] = _output_inverse(0)/max_angular_wheel_speed;
-	v_thrust_sp.xyz[1] = 0.0f;
-	v_thrust_sp.xyz[2] = 0.0f;
-	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
+	_actuator_motors.timestamp = hrt_absolute_time();
+	_actuator_motors.reversible_flags = 3;
+	_actuator_motors.control[0] = _output_inverse(0)/max_angular_wheel_speed;
+	_actuator_motors.control[1] = _output_inverse(1)/max_angular_wheel_speed;
 
-	vehicle_torque_setpoint_s v_torque_sp{};
-	v_torque_sp.timestamp = hrt_absolute_time();
-	v_torque_sp.xyz[0] = 0.f;
-	v_torque_sp.xyz[1] = 0.f;
-	v_torque_sp.xyz[2] = _output_inverse(1)/max_angular_wheel_speed;
-	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
+	// printf("Publishing %f %f \n", (double)_actuator_motors.output[0], (double)_actuator_motors.output[1]);
+
+	_outputs_pub.publish(_actuator_motors);
 
 }
 

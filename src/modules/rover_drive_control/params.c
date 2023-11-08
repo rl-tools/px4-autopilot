@@ -37,8 +37,11 @@
  * This enables continuous calibration of the magnetometers
  * before takeoff using gyro data.
  *
- * @boolean
- * @reboot_required true
+ * @unit m
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
  * @group Rover Drive Control
  */
 PARAM_DEFINE_FLOAT(RDC_WHEEL_BASE, 0.54f);
@@ -46,9 +49,7 @@ PARAM_DEFINE_FLOAT(RDC_WHEEL_BASE, 0.54f);
 /**
  * Wheel Radius
  *
- * Increase to make the estimator more responsive
- * Decrease to make the estimator more robust to noise
- *
+ * @unit m
  * @min 0.0
  * @max 100
  * @increment 0.001
@@ -74,7 +75,7 @@ PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 1.0f);
  * Max Angular Velocity
  *
  *
- * @unit m/s
+ * @unit rad/s
  * @min 0.0
  * @max 100
  * @increment 0.001
@@ -131,4 +132,42 @@ PARAM_DEFINE_FLOAT(RDC_D_GAIN_WC, 0.0f);
  */
 PARAM_DEFINE_FLOAT(RDC_VEL_ALGN, 0.2f);
 
+/**
+ * Max linear velocity Jerk
+ *
+ *
+ * @unit m/s3
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_MAX_JERK, 22.f);
+
+/**
+ * Max linear acceleration
+ *
+ *
+ * @unit m/s2
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_MAX_ACCEL, 1.f);
+
+/**
+ * Slowdown Velocity for Waypoint
+ *
+ *
+ * @unit m/s
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_FLOAT(RDC_WP_VEL, 0.5f);
 
