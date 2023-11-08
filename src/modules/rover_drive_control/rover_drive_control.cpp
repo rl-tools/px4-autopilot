@@ -113,9 +113,17 @@ void RoverDriveControl::Run()
 
 
 	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
-		subscribeManualControl();
-	} else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
-		subscribeAutoControl();
+		if (_manual_control_setpoint_sub.updated()) {
+			manual_control_setpoint_s manual_control_setpoint{};
+			if (_manual_control_setpoint_sub.updated()) {
+				_input_feed_forward(0) = manual_control_setpoint.throttle*_param_rdc_max_forwards_velocity.get();
+				_input_feed_forward(1) = manual_control_setpoint.roll*_param_rdc_max_angular_velocity.get();
+			}
+		}
+
+
+	// } else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
+	// 	subscribeAutoControl();
 	} else {
 		// if the system is in an error state, stop the vehicle
 		_input_pid = {0.0f, 0.0f};
@@ -131,14 +139,6 @@ void RoverDriveControl::Run()
 
 	_last_timestamp = _current_timestamp;
 
-}
-
-void RoverDriveControl::subscribeManualControl()
-{
-	_manual_control_setpoint_sub.copy(&_manual_control_setpoint);
-
-	_input_feed_forward(0) = _manual_control_setpoint.throttle*_param_rdc_max_forwards_velocity.get();
-	_input_feed_forward(1) = _manual_control_setpoint.roll*_param_rdc_max_angular_velocity.get();
 }
 
 void RoverDriveControl::subscribeAutoControl()

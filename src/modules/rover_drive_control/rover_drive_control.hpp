@@ -106,7 +106,6 @@ private:
 
 	void Run() override;
 	void publishRateControl();
-	void subscribeManualControl();
 	void subscribeAutoControl();
 	void vehicle_control_mode_poll();
 	void setAndPublishActuatorOutputs();
@@ -139,7 +138,6 @@ private:
 	uORB::SubscriptionMultiArray<wheel_encoders_s>	_wheel_encoders_sub{ORB_ID::wheel_encoders};
 
 	differential_drive_control_s 		_diff_drive_control{};
-	manual_control_setpoint_s		_manual_control_setpoint{};
 	vehicle_control_mode_s			_control_mode{};
 	actuator_motors_s 			_actuator_motors{};
 	position_setpoint_triplet_s 		_pos_sp_triplet{};
