@@ -34,8 +34,6 @@
 /**
  * Wheel Base (Distance from wheel to wheel)
  *
- * This enables continuous calibration of the magnetometers
- * before takeoff using gyro data.
  *
  * @unit m
  * @min 0.0
