@@ -1,5 +1,0 @@
-menuconfig MODULES_ROVER_DRIVE_CONTROL
-	bool "rover_drive_control"
-	default y
-	---help---
-		Enable support for rover_drive_control

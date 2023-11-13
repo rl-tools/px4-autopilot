@@ -31,29 +31,25 @@
  *
  ****************************************************************************/
 
-#include "rover_drive_control.hpp"
+#include "differential_drive_control.hpp"
 
 using namespace time_literals;
-using matrix::Vector3f;
 
-namespace rover_drive_control
+namespace differential_drive_control
 {
 
-RoverDriveControl::RoverDriveControl() :
+DifferentialDriveControl::DifferentialDriveControl() :
 	ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl),
-	_differential_kinematics_controller(this),
-	_differential_guidance_controller(this)
+	_differential_kinematics_controller(this)
 {
-	_differential_drive_control_pub.advertise();
-	_vehicle_thrust_setpoint_pub.advertise();
 	_outputs_pub.advertise();
 	_last_timestamp = hrt_absolute_time();
 }
 
-int RoverDriveControl::task_spawn(int argc, char *argv[])
+int DifferentialDriveControl::task_spawn(int argc, char *argv[])
 {
-	RoverDriveControl *obj = new RoverDriveControl();
+	DifferentialDriveControl *obj = new DifferentialDriveControl();
 
 	if (!obj) {
 		PX4_ERR("alloc failed");
@@ -63,13 +59,12 @@ int RoverDriveControl::task_spawn(int argc, char *argv[])
 	_object.store(obj);
 	_task_id = task_id_is_work_queue;
 
-	/* Schedule a cycle to start things. */
 	obj->start();
 
 	return 0;
 }
 
-void RoverDriveControl::Run()
+void DifferentialDriveControl::Run()
 {
 
 	if (should_exit()) {
@@ -80,11 +75,8 @@ void RoverDriveControl::Run()
 	_current_timestamp = hrt_absolute_time();
 
 	vehicle_control_mode_poll();
-	position_setpoint_triplet_poll();
-	vehicle_position_poll();
-	vehicle_attitude_poll();
-	encoder_data_poll();
-	_dt = getDt();
+
+	_dt = get_dt();
 
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
@@ -101,13 +93,10 @@ void RoverDriveControl::Run()
 		}
 	}
 
-	// check for parameter updates
 	if (_parameter_update_sub.updated()) {
-		// clear update
 		parameter_update_s pupdate;
 		_parameter_update_sub.copy(&pupdate);
 
-		// update parameters from storage
 		updateParams();
 	}
 
@@ -116,21 +105,18 @@ void RoverDriveControl::Run()
 		if (_manual_control_setpoint_sub.updated()) {
 			manual_control_setpoint_s manual_control_setpoint{};
 			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
+
+			// directly get the input from the manual control setpoint (joystick)
 			_input_feed_forward(0) = manual_control_setpoint.throttle*_param_rdc_max_forwards_velocity.get();
 			_input_feed_forward(1) = manual_control_setpoint.roll*_param_rdc_max_angular_velocity.get();
 		}
-
-
-	// } else if (_control_mode.flag_control_auto_enabled && _control_mode.flag_armed) {
-	// 	subscribeAutoControl();
 	} else {
 		// if the system is in an error state, stop the vehicle
-		_input_pid = {0.0f, 0.0f};
 		_input_feed_forward = {0.0f, 0.0f};
 	}
 
 	// get the wheel speeds from the inverse kinematics class (differential_drive_control_kinematics)
-	_differential_kinematics_controller.setInput(_input_feed_forward + _input_pid, true);
+	_differential_kinematics_controller.setInput(_input_feed_forward, true);
 	_output_inverse = _differential_kinematics_controller.getOutput(true);
 
 	// publish data to actuator_motors (output module)
@@ -140,57 +126,13 @@ void RoverDriveControl::Run()
 
 }
 
-void RoverDriveControl::subscribeAutoControl()
-{
-
-	_global_position(0) = _global_pos.lat;
-	_global_position(1) = _global_pos.lon;
-
-	_next_waypoint(0) = _pos_sp_triplet.next.lat;
-	_next_waypoint(1) = _pos_sp_triplet.next.lon;
-
-	_current_waypoint(0) = _pos_sp_triplet.current.lat;
-	_current_waypoint(1) = _pos_sp_triplet.current.lon;
-
-	// edge case when system is initialized and there is no previous waypoint
-	if(!PX4_ISFINITE(_pos_sp_triplet.previous.lat) && !_first_waypoint_intialized){
-		_previous_waypoint(0) = _global_position(0);
-		_previous_waypoint(1) = _global_position(1);
-		_first_waypoint_intialized = true;
-	} else if (PX4_ISFINITE(_pos_sp_triplet.previous.lat)){
-		_previous_waypoint(0) = _pos_sp_triplet.previous.lat;
-		_previous_waypoint(1) = _pos_sp_triplet.previous.lon;
-	}
-
-	const float vehicle_yaw = matrix::Eulerf(matrix::Quatf(_vehicle_att.q)).psi();
-
-	matrix::Vector2f guidance_output =
-		_differential_guidance_controller.computeGuidance(
-			_global_position,
-			_current_waypoint,
-			_previous_waypoint,
-			_next_waypoint,
-			vehicle_yaw,
-			_dt,
-			_param_rdc_max_forwards_velocity.get(),
-			_param_rdc_max_angular_velocity.get()
-		);
-
-
-	_input_feed_forward(0) = guidance_output(0);
-	_input_feed_forward(1) = guidance_output(1);
-
-
-}
-
-float RoverDriveControl::getDt()
+float DifferentialDriveControl::get_dt()
 {
 	return ((_current_timestamp - _last_timestamp)/1000000);
 }
 
-void RoverDriveControl::publishRateControl()
+void DifferentialDriveControl::publishRateControl()
 {
-
 	// Superpose Linear and Angular velocity vector
 	float max_angular_wheel_speed = ((_param_rdc_max_forwards_velocity.get() + (_param_rdc_max_angular_velocity.get()*_param_rdc_wheel_base.get()/2)) / _param_rdc_wheel_radius.get());
 
@@ -200,93 +142,27 @@ void RoverDriveControl::publishRateControl()
 	_actuator_motors.control[1] = _output_inverse(1)/max_angular_wheel_speed;
 
 	_outputs_pub.publish(_actuator_motors);
-
 }
 
-void RoverDriveControl::encoder_data_poll()
-{
-	// TODO Add parameters that asks how many wheels there are.
-
-	float sum_left_encoders_speed = 0.0f;
-	float sum_right_encoders_speed = 0.0f;
-	int count_left_encoders = 0;
-	int count_right_encoders = 0;
-
-	for (int i = 0; i < _wheel_encoders_sub.size(); ++i) {
-		auto &sub = _wheel_encoders_sub[i];
-		if (sub.update(&_wheel_encoder)) {
-		if (i < 2) {  // Assuming first two encoders are for the right side
-			sum_right_encoders_speed += _wheel_encoder.wheel_speed[i];
-			count_right_encoders++;
-		} else {  // Assuming the last two encoders are for the left side
-			sum_left_encoders_speed += _wheel_encoder.wheel_speed[i];
-			count_left_encoders++;
-		}
-		}
-	}
-
-	if (count_right_encoders > 0 && count_left_encoders > 0) {
-		_encoder_data(0) = sum_right_encoders_speed / count_right_encoders;
-		_encoder_data(1) = sum_left_encoders_speed / count_left_encoders;
-
-		_differential_kinematics_controller.setInput(_encoder_data, false);
-
-		_output_forwards = _differential_kinematics_controller.getOutput(false);
-
-	}
-	else {
-		// PX4_ERR("No encoder data received.");
-		return;
-	}
-}
-
-
-void RoverDriveControl::vehicle_control_mode_poll()
+void DifferentialDriveControl::vehicle_control_mode_poll()
 {
 	if (_control_mode_sub.updated()) {
 		_control_mode_sub.copy(&_control_mode);
 	}
 }
 
-void RoverDriveControl::position_setpoint_triplet_poll()
+void DifferentialDriveControl::start()
 {
-	if (_pos_sp_triplet_sub.updated()) {
-		_pos_sp_triplet_sub.copy(&_pos_sp_triplet);
-	}
+	ScheduleOnInterval(10_ms); // 100 Hz
 }
 
-void RoverDriveControl::vehicle_position_poll()
+int DifferentialDriveControl::print_status()
 {
-	if(_global_pos_sub.updated()) {
-		_global_pos_sub.copy(&_global_pos);
-	}
-
-
-	if(_local_pos_sub.updated()) {
-		_local_pos_sub.copy(&_local_pos);
-	}
-
-}
-
-void RoverDriveControl::vehicle_attitude_poll()
-{
-	if (_att_sub.updated()) {
-		_att_sub.copy(&_vehicle_att);
-	}
-}
-
-void RoverDriveControl::start()
-{
-	ScheduleOnInterval(1_ms); // 100 Hz
-}
-
-int RoverDriveControl::print_status()
-{
-
+	PX4_INFO("Diffential Drive Controller running");
 	return 0;
 }
 
-int RoverDriveControl::print_usage(const char *reason)
+int DifferentialDriveControl::print_usage(const char *reason)
 {
 	if (reason) {
 		PX4_ERR("%s\n", reason);
@@ -295,18 +171,18 @@ int RoverDriveControl::print_usage(const char *reason)
 	PRINT_MODULE_DESCRIPTION(
 		R"DESCR_STR(
 ### Description
-Online rover controller.
+Rover Differential Drive controller.
 )DESCR_STR");
 
-	PRINT_MODULE_USAGE_NAME("rover_drive_control", "system");
+	PRINT_MODULE_USAGE_NAME("differential_drive", "system");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("start", "Start the background task");
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 	return 0;
 }
 
-extern "C" __EXPORT int rover_drive_control_main(int argc, char *argv[])
+extern "C" __EXPORT int differential_drive_control_main(int argc, char *argv[])
 {
-	return RoverDriveControl::main(argc, argv);
+	return DifferentialDriveControl::main(argc, argv);
 }
 
-} // namespace rover_drive_control
+} // namespace differential_drive_control

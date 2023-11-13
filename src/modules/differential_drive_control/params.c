@@ -169,3 +169,23 @@ PARAM_DEFINE_FLOAT(RDC_MAX_ACCEL, 1.f);
  */
 PARAM_DEFINE_FLOAT(RDC_WP_VEL, 0.5f);
 
+/**
+ * Wheel count
+ *
+ *
+ * @min 0
+ * @max 100
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_INT32(RDC_WHEEL_COUNT, 4);
+
+/**
+ * Wheel encoder count
+ *
+ *
+ * @min 0
+ * @max 100
+ * @group Rover Drive Control
+ */
+PARAM_DEFINE_INT32(RDC_ENCODER, 4);
+

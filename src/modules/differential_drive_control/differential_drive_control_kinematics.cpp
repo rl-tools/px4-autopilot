@@ -50,8 +50,3 @@ matrix::Vector2f differential_drive_control_kinematics::getOutput(bool inverse) 
 	}
 
 }
-
-float differential_drive_control_kinematics::pid()
-{
-	return 0;
-}

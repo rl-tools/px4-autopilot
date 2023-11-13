@@ -70,7 +70,6 @@ set(msg_files
 	DebugValue.msg
 	DebugVect.msg
 	DifferentialPressure.msg
-	DifferentialDriveControl.msg
 	DistanceSensor.msg
 	Ekf2Timestamps.msg
 	EscReport.msg

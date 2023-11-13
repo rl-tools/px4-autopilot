@@ -31,21 +31,15 @@
 #
 ############################################################################
 px4_add_module(
-	MODULE modules__rover_drive_control
-	MAIN rover_drive_control
+	MODULE modules__differential_drive_control
+	MAIN differential_drive_control
 	COMPILE_FLAGS
 		#-DDEBUG_BUILD
 	SRCS
-		rover_drive_control.cpp
-		rover_drive_control.hpp
+		differential_drive_control.cpp
+		differential_drive_control.hpp
 		differential_drive_control_kinematics.cpp
 		differential_drive_control_kinematics.hpp
-		differential_drive_control_guidance.cpp
-		differential_drive_control_guidance.hpp
-		differential_drive_control_guidance.cpp
-		differential_drive_control_guidance.hpp
-		rover_drive_control_pid.cpp
-		rover_drive_control_pid.hpp
 	DEPENDS
 		px4_work_queue
 )

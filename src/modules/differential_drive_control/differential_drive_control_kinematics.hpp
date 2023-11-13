@@ -51,9 +51,6 @@ public:
 	void setInput(const matrix::Vector2f& input, bool inverse);
 	matrix::Vector2f getOutput(bool inverse) const;
 
-	float pid();
-
-
 private:
 
 	// Input & Output (Don't really need input tbh, but lets see)

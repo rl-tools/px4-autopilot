@@ -57,9 +57,6 @@
 #include <uORB/topics/sensor_baro.h>
 #include <uORB/topics/vehicle_odometry.h>
 
-// perfrivik temporary
-
-#include <uORB/topics/differential_drive_control.h>
 #include <uORB/topics/wheel_encoders.h>
 #include <gz/msgs/model.pb.h>
 
@@ -116,10 +113,6 @@ private:
 	void directMotorSub();
 	void directMotorPub();
 	void encoderCallback(const gz::msgs::Model &model);
-
-	uORB::Subscription _differential_drive_control_sub{ORB_ID(differential_drive_control)};
-
-	differential_drive_control_s 		_diff_drive_control{};
 
 	matrix::Vector2f 			_input{0.0f, 0.0f};
 

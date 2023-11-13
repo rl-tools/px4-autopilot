@@ -374,8 +374,6 @@ void GZBridge::encoderCallback(const gz::msgs::Model &model)
 		_motorSpeeds[i] = joint.axis1().velocity();
 	}
 
-	// PX4_ERR("Testing: %f and %f", (double)_encoderCounts[0], (double)_motorSpeeds[0] );
-
 	encoderDataPub();
 
 	pthread_mutex_unlock(&_node_mutex);
@@ -744,18 +742,6 @@ void GZBridge::Run()
 		_mixing_interface_servo.updateParams();
 	}
 
-	// temporary perfrivik
-
-	if(_differential_drive_control_sub.updated()){
-		directMotorSub();
-		directMotorPub();
-
-		// temporary, not sure how to do a callback depending on a gz topic
-		// encoderDatasub();
-		// encoderDataPub();
-	}
-
-
 
 	ScheduleDelayed(10_ms);
 
@@ -779,32 +765,6 @@ void GZBridge::encoderDataPub()
 	_wheel_encoders_pub.publish(_wheel_encoders_msg);
 
 }
-
-void GZBridge::directMotorSub()
-{
-	_differential_drive_control_sub.copy(&_diff_drive_control);
-
-	_input(0) = _diff_drive_control.motor_control[0];
-	_input(1) = _diff_drive_control.motor_control[1];
-}
-
-void GZBridge::directMotorPub()
-{
-
-	gz::msgs::Actuators motor_velocity_message;
-	motor_velocity_message.mutable_velocity()->Resize(2, 0);
-
-	for (unsigned i = 0; i < 2; i++) {
-		motor_velocity_message.set_velocity(i, _input(i));
-	}
-
-	if (_actuators_pub.Valid()) {
-		_actuators_pub.Publish(motor_velocity_message);
-	}
-
-}
-
-
 
 int GZBridge::print_status()
 {
