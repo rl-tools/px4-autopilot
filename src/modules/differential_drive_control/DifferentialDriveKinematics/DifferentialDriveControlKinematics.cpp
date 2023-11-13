@@ -1,4 +1,4 @@
-#include "differential_drive_control_kinematics.hpp"
+#include "DifferentialDriveControlKinematics.hpp"
 
 
 void differential_drive_control_kinematics::setInput(const matrix::Vector2f& input, bool inverse)

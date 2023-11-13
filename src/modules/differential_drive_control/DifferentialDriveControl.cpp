@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 
-#include "differential_drive_control.hpp"
+#include "DifferentialDriveControl.hpp"
 
 using namespace time_literals;
 
@@ -76,8 +76,6 @@ void DifferentialDriveControl::Run()
 
 	vehicle_control_mode_poll();
 
-	_dt = get_dt();
-
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
 
@@ -101,7 +99,7 @@ void DifferentialDriveControl::Run()
 	}
 
 
-	if(_control_mode.flag_control_manual_enabled && _control_mode.flag_armed){
+	if(_vehicle_control_mode.flag_control_manual_enabled && _vehicle_control_mode.flag_armed){
 		if (_manual_control_setpoint_sub.updated()) {
 			manual_control_setpoint_s manual_control_setpoint{};
 			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
@@ -126,11 +124,6 @@ void DifferentialDriveControl::Run()
 
 }
 
-float DifferentialDriveControl::get_dt()
-{
-	return ((_current_timestamp - _last_timestamp)/1000000);
-}
-
 void DifferentialDriveControl::publishRateControl()
 {
 	// Superpose Linear and Angular velocity vector
@@ -146,8 +139,8 @@ void DifferentialDriveControl::publishRateControl()
 
 void DifferentialDriveControl::vehicle_control_mode_poll()
 {
-	if (_control_mode_sub.updated()) {
-		_control_mode_sub.copy(&_control_mode);
+	if (_vehicle_control_mode_sub.updated()) {
+		_vehicle_control_mode_sub.copy(&_vehicle_control_mode);
 	}
 }
 

@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2023 PX4 Development Team. All rights reserved.
+ *   Copyright (C) 2019 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,56 +31,17 @@
  *
  ****************************************************************************/
 
-/**
- * Wheel Base (Distance from wheel to wheel)
- *
- *
- * @unit m
- * @min 0.0
- * @max 100
- * @increment 0.001
- * @decimal 5
- * @group Rover Drive Control
- */
-PARAM_DEFINE_FLOAT(RDC_WHEEL_BASE, 0.54f);
+#include <gtest/gtest.h>
+#include "DifferentialDriveControl.hpp"
+#include <mathlib/math/Functions.hpp>
 
-/**
- * Wheel Radius
- *
- * @unit m
- * @min 0.0
- * @max 100
- * @increment 0.001
- * @decimal 5
- * @group Rover Drive Control
- */
-PARAM_DEFINE_FLOAT(RDC_WHEEL_RADIUS, 0.0686f);
+using namespace matrix;
 
-/**
- * Max Forwards Velocity
- *
- *
- * @unit m/s
- * @min 0.0
- * @max 100
- * @increment 0.001
- * @decimal 5
- * @group Rover Drive Control
- */
-PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 1.0f);
-
-/**
- * Max Angular Velocity
- *
- *
- * @unit rad/s
- * @min 0.0
- * @max 100
- * @increment 0.001
- * @decimal 5
- * @group Rover Drive Control
- */
-PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 1.0f);
-
-
-
+TEST(DifferentialDriveControlTest, AllZeroCase)
+{
+	differential_drive_control_kinematics kinematics;
+	Vector2f rate_setpoint = {0.f, 0.f};
+	kinematics.setInput(rate_setpoint, true);
+	Vector2f wheel_output = kinematics.getOutput(true);
+	EXPECT_EQ(wheel_output, Vector2f());
+}

@@ -36,10 +36,14 @@ px4_add_module(
 	COMPILE_FLAGS
 		#-DDEBUG_BUILD
 	SRCS
-		differential_drive_control.cpp
-		differential_drive_control.hpp
-		differential_drive_control_kinematics.cpp
-		differential_drive_control_kinematics.hpp
+		DifferentialDriveControl.cpp
+		DifferentialDriveControl.hpp
+		DifferentialDriveControlKinematics.cpp
+		DifferentialDriveControlKinematics.hpp
 	DEPENDS
 		px4_work_queue
 )
+
+
+
+px4_add_unit_gtest(SRC DifferentialDriveControlTest.cpp)

@@ -56,7 +56,7 @@
 #include <math.h>
 
 // Local includes
-#include "differential_drive_control_kinematics.hpp"
+#include "DifferentialDriveControlKinematics.hpp"
 
 namespace differential_drive_control
 {
@@ -88,7 +88,6 @@ private:
 	void Run() override;
 	void publishRateControl();
 	void vehicle_control_mode_poll();
-	float get_dt();
 
 	uORB::PublicationMulti<actuator_motors_s> _outputs_pub{ORB_ID(actuator_motors)};
 
@@ -120,9 +119,7 @@ private:
 		(ParamFloat<px4::params::RDC_MAX_FORW_VEL>) _param_rdc_max_forwards_velocity,
 		(ParamFloat<px4::params::RDC_MAX_ANG_VEL>) _param_rdc_max_angular_velocity,
 		(ParamFloat<px4::params::RDC_WHEEL_BASE>) _param_rdc_wheel_base,
-		(ParamFloat<px4::params::RDC_WHEEL_RADIUS>) _param_rdc_wheel_radius,
-		(ParamInt<px4::params::RDC_WHEEL_COUNT>) _param_rdc_wheel_count,
-		(ParamInt<px4::params::RDC_ENCODER>) _param_rdc_encoder_count
+		(ParamFloat<px4::params::RDC_WHEEL_RADIUS>) _param_rdc_wheel_radius
 
 	)
 };
