@@ -36,8 +36,16 @@
 bool GZMixingInterfaceESC::init(const std::string &model_name)
 {
 
-	// ESC feedback: /x500/command/motor_speed
-	std::string motor_speed_topic = "/model/" + model_name + "/command/motor_speed";
+	// Unfortunately the gazebo joint controller topic does not match the MulticopterMotorModel topic name (Issue on the Gazebo side)
+	// MulticopterMotorModel.cc: https://github.com/gazebosim/gz-sim/blob/gz-sim7/src/systems/multicopter_motor_model/MulticopterMotorModel.cc#L377C9
+	// JointController.cc: https://github.com/gazebosim/gz-sim/blob/gz-sim7/src/systems/joint_controller/JointController.cc#L210
+	std::string motor_speed_topic = "";
+
+	if(model_name == "r1_rover_0"){
+		motor_speed_topic = "/model/" + model_name + "/command/motor_speed";
+	} else {
+		motor_speed_topic = "/" + model_name + "/command/motor_speed";
+	}
 
 	std::cout << "Motor speed topic: " << motor_speed_topic << std::endl;
 
