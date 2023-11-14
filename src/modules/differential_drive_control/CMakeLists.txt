@@ -30,6 +30,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+add_subdirectory(DifferentialDriveKinematics)
+
 px4_add_module(
 	MODULE modules__differential_drive_control
 	MAIN differential_drive_control
@@ -38,12 +40,9 @@ px4_add_module(
 	SRCS
 		DifferentialDriveControl.cpp
 		DifferentialDriveControl.hpp
-		DifferentialDriveControlKinematics.cpp
-		DifferentialDriveControlKinematics.hpp
 	DEPENDS
+		DifferentialDriveKinematics
 		px4_work_queue
 )
 
 
-
-px4_add_unit_gtest(SRC DifferentialDriveControlTest.cpp)

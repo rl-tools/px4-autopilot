@@ -40,11 +40,11 @@
 
 
 
-class differential_drive_control_kinematics : public ModuleParams
+class DifferentialDriveKinematics : public ModuleParams
 {
 public:
-	differential_drive_control_kinematics(ModuleParams *parent) : ModuleParams(parent) {};
-	~differential_drive_control_kinematics() = default;
+	DifferentialDriveKinematics(ModuleParams *parent) : ModuleParams(parent) {};
+	~DifferentialDriveKinematics() = default;
 
 	void computeInverseKinematics();
 	void computeForwardsKinematics();

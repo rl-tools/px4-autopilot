@@ -1,7 +1,7 @@
-#include "DifferentialDriveControlKinematics.hpp"
+#include "DifferentialDriveKinematics.hpp"
 
 
-void differential_drive_control_kinematics::setInput(const matrix::Vector2f& input, bool inverse)
+void DifferentialDriveKinematics::setInput(const matrix::Vector2f& input, bool inverse)
 {
     	_input = input;
 
@@ -17,7 +17,7 @@ void differential_drive_control_kinematics::setInput(const matrix::Vector2f& inp
 
 }
 
-void differential_drive_control_kinematics::computeInverseKinematics()
+void DifferentialDriveKinematics::computeInverseKinematics()
 {
 	float r = _param_rdc_wheel_radius.get();
 	float l = _param_rdc_wheel_base.get();
@@ -29,7 +29,7 @@ void differential_drive_control_kinematics::computeInverseKinematics()
 	_output_inverse(1) = _motor_vel_left;
 }
 
-void differential_drive_control_kinematics::computeForwardsKinematics()
+void DifferentialDriveKinematics::computeForwardsKinematics()
 {
 	float r = _param_rdc_wheel_radius.get();
 	float l = _param_rdc_wheel_base.get();
@@ -41,7 +41,7 @@ void differential_drive_control_kinematics::computeForwardsKinematics()
 	_output_forwards(1) = _yaw_rate;
 }
 
-matrix::Vector2f differential_drive_control_kinematics::getOutput(bool inverse) const
+matrix::Vector2f DifferentialDriveKinematics::getOutput(bool inverse) const
 {
 	if(inverse){
 		return _output_inverse;

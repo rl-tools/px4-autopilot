@@ -37,9 +37,9 @@
 
 using namespace matrix;
 
-TEST(DifferentialDriveControlTest, AllZeroCase)
+TEST(DifferentialDriveKinematicsTest, AllZeroCase)
 {
-	differential_drive_control_kinematics kinematics;
+	DifferentialDriveKinematics kinematics;
 	Vector2f rate_setpoint = {0.f, 0.f};
 	kinematics.setInput(rate_setpoint, true);
 	Vector2f wheel_output = kinematics.getOutput(true);

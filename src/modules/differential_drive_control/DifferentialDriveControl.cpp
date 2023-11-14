@@ -113,7 +113,7 @@ void DifferentialDriveControl::Run()
 		_input_feed_forward = {0.0f, 0.0f};
 	}
 
-	// get the wheel speeds from the inverse kinematics class (differential_drive_control_kinematics)
+	// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
 	_differential_kinematics_controller.setInput(_input_feed_forward, true);
 	_output_inverse = _differential_kinematics_controller.getOutput(true);
 
