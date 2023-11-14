@@ -19,11 +19,8 @@ void DifferentialDriveKinematics::setInput(const matrix::Vector2f& input, bool i
 
 void DifferentialDriveKinematics::computeInverseKinematics()
 {
-	float r = _param_rdc_wheel_radius.get();
-	float l = _param_rdc_wheel_base.get();
-
-	_motor_vel_right = _linear_vel_x/r + l/2 * _yaw_rate/r;
-	_motor_vel_left = _linear_vel_x/r - l/2 * _yaw_rate/r;
+	_motor_vel_right = _linear_vel_x/_wheel_radius + _wheel_base/2 * _yaw_rate/_wheel_radius;
+	_motor_vel_left = _linear_vel_x/_wheel_radius - _wheel_base/2 * _yaw_rate/_wheel_radius;
 
 	_output_inverse(0) = _motor_vel_right;
 	_output_inverse(1) = _motor_vel_left;
@@ -31,14 +28,31 @@ void DifferentialDriveKinematics::computeInverseKinematics()
 
 void DifferentialDriveKinematics::computeForwardsKinematics()
 {
-	float r = _param_rdc_wheel_radius.get();
-	float l = _param_rdc_wheel_base.get();
-
-	_linear_vel_x = r/2*(_motor_vel_right + _motor_vel_left);
-	_yaw_rate = r/l*(_motor_vel_right - _motor_vel_left);
+	_linear_vel_x = _wheel_radius/2*(_motor_vel_right + _motor_vel_left);
+	_yaw_rate = _wheel_radius/_wheel_base*(_motor_vel_right - _motor_vel_left);
 
 	_output_forwards(0) = _linear_vel_x;
 	_output_forwards(1) = _yaw_rate;
+}
+
+void DifferentialDriveKinematics::setWheelBase(float wheel_base)
+{
+	if(wheel_base <= 0){
+		printf("Wheel base must be greater than 0\n");
+		return;
+	}
+
+	_wheel_base = wheel_base;
+}
+
+void DifferentialDriveKinematics::setWheelRadius(float wheel_radius)
+{
+	if(wheel_radius <= 0){
+		printf("Wheel radius must be greater than 0\n");
+		return;
+	}
+
+	_wheel_radius = wheel_radius;
 }
 
 matrix::Vector2f DifferentialDriveKinematics::getOutput(bool inverse) const

@@ -33,22 +33,20 @@
 
 #pragma once
 
-#include <px4_platform_common/module.h>
-#include <px4_platform_common/module_params.h>
-
 #include <matrix/matrix/math.hpp>
 
-
-
-class DifferentialDriveKinematics : public ModuleParams
+class DifferentialDriveKinematics
 {
 public:
-	DifferentialDriveKinematics(ModuleParams *parent) : ModuleParams(parent) {};
+	DifferentialDriveKinematics() = default;
 	~DifferentialDriveKinematics() = default;
 
 	void computeInverseKinematics();
 	void computeForwardsKinematics();
+	void setWheelBase(float wheel_base);
+	void setWheelRadius(float wheel_radius);
 	void setInput(const matrix::Vector2f& input, bool inverse);
+
 	matrix::Vector2f getOutput(bool inverse) const;
 
 private:
@@ -64,9 +62,7 @@ private:
 	float _motor_vel_right{0.0f};
 	float _motor_vel_left{0.0f};
 
+	float _wheel_base{1.0f};
+	float _wheel_radius{1.0f};
 
-	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::RDC_WHEEL_BASE>) _param_rdc_wheel_base,
-		(ParamFloat<px4::params::RDC_WHEEL_RADIUS>) _param_rdc_wheel_radius
-	)
 };

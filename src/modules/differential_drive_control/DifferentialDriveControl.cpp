@@ -40,11 +40,12 @@ namespace differential_drive_control
 
 DifferentialDriveControl::DifferentialDriveControl() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl),
-	_differential_kinematics_controller(this)
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl)
 {
 	_outputs_pub.advertise();
 	_last_timestamp = hrt_absolute_time();
+	_differential_drive_kinematics.setWheelBase(_param_rdc_wheel_base.get());
+	_differential_drive_kinematics.setWheelRadius(_param_rdc_wheel_radius.get());
 }
 
 int DifferentialDriveControl::task_spawn(int argc, char *argv[])
@@ -114,8 +115,8 @@ void DifferentialDriveControl::Run()
 	}
 
 	// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
-	_differential_kinematics_controller.setInput(_input_feed_forward, true);
-	_output_inverse = _differential_kinematics_controller.getOutput(true);
+	_differential_drive_kinematics.setInput(_input_feed_forward, true);
+	_output_inverse = _differential_drive_kinematics.getOutput(true);
 
 	// publish data to actuator_motors (output module)
 	publishRateControl();
