@@ -40,9 +40,10 @@
  * @max 100
  * @increment 0.001
  * @decimal 5
- * @group Rover Drive Control
+ * @reboot_required true
+ * @group Rover Differential Drive
  */
-PARAM_DEFINE_FLOAT(RDC_WHEEL_BASE, 0.54f);
+PARAM_DEFINE_FLOAT(RDD_WHEEL_BASE, 0.54f);
 
 /**
  * Wheel Radius
@@ -52,9 +53,10 @@ PARAM_DEFINE_FLOAT(RDC_WHEEL_BASE, 0.54f);
  * @max 100
  * @increment 0.001
  * @decimal 5
- * @group Rover Drive Control
+ * @reboot_required true
+ * @group Rover Differential Drive
  */
-PARAM_DEFINE_FLOAT(RDC_WHEEL_RADIUS, 0.0686f);
+PARAM_DEFINE_FLOAT(RDD_WHEEL_RADIUS, 0.0686f);
 
 /**
  * Max Forwards Velocity
@@ -63,11 +65,11 @@ PARAM_DEFINE_FLOAT(RDC_WHEEL_RADIUS, 0.0686f);
  * @unit m/s
  * @min 0.0
  * @max 100
- * @increment 0.001
- * @decimal 5
- * @group Rover Drive Control
+ * @increment 0.01
+ * @decimal 2
+ * @group Rover Differential Drive
  */
-PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 1.0f);
+PARAM_DEFINE_FLOAT(RDD_MAX_FORW_VEL, 1.0f);
 
 /**
  * Max Angular Velocity
@@ -76,11 +78,11 @@ PARAM_DEFINE_FLOAT(RDC_MAX_FORW_VEL, 1.0f);
  * @unit rad/s
  * @min 0.0
  * @max 100
- * @increment 0.001
- * @decimal 5
- * @group Rover Drive Control
+ * @increment 0.01
+ * @decimal 2
+ * @group Rover Differential Drive
  */
-PARAM_DEFINE_FLOAT(RDC_MAX_ANG_VEL, 1.0f);
+PARAM_DEFINE_FLOAT(RDD_MAX_ANG_VEL, 0.5f);
 
 
 

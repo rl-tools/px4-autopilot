@@ -44,8 +44,8 @@ DifferentialDriveControl::DifferentialDriveControl() :
 {
 	_outputs_pub.advertise();
 	_last_timestamp = hrt_absolute_time();
-	_differential_drive_kinematics.setWheelBase(_param_rdc_wheel_base.get());
-	_differential_drive_kinematics.setWheelRadius(_param_rdc_wheel_radius.get());
+	_differential_drive_kinematics.setWheelBase(_param_rdd_wheel_base.get());
+	_differential_drive_kinematics.setWheelRadius(_param_rdd_wheel_radius.get());
 }
 
 int DifferentialDriveControl::task_spawn(int argc, char *argv[])
@@ -106,8 +106,8 @@ void DifferentialDriveControl::Run()
 			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
 
 			// directly get the input from the manual control setpoint (joystick)
-			_input_feed_forward(0) = manual_control_setpoint.throttle*_param_rdc_max_forwards_velocity.get();
-			_input_feed_forward(1) = manual_control_setpoint.roll*_param_rdc_max_angular_velocity.get();
+			_input_feed_forward(0) = manual_control_setpoint.throttle*_param_rdd_max_forwards_velocity.get();
+			_input_feed_forward(1) = manual_control_setpoint.roll*_param_rdd_max_angular_velocity.get();
 		}
 	} else {
 		// if the system is in an error state, stop the vehicle
@@ -128,7 +128,7 @@ void DifferentialDriveControl::Run()
 void DifferentialDriveControl::publishRateControl()
 {
 	// Superpose Linear and Angular velocity vector
-	float max_angular_wheel_speed = ((_param_rdc_max_forwards_velocity.get() + (_param_rdc_max_angular_velocity.get()*_param_rdc_wheel_base.get()/2)) / _param_rdc_wheel_radius.get());
+	float max_angular_wheel_speed = ((_param_rdd_max_forwards_velocity.get() + (_param_rdd_max_angular_velocity.get()*_param_rdd_wheel_base.get()/2)) / _param_rdd_wheel_radius.get());
 
 	_actuator_motors.timestamp = hrt_absolute_time();
 	_actuator_motors.reversible_flags = 3;
