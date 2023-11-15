@@ -40,11 +40,10 @@
 
 
 #include <uORB/PublicationMulti.hpp>
-#include <uORB/topics/esc_status.h>
 #include <uORB/topics/wheel_encoders.h>
 
 
-// GZBridge mixing class for ESCs.
+// GZBridge mixing class for Motors.
 // It is separate from GZBridge to have separate WorkItems and therefore allowing independent scheduling
 // All work items are expected to run on the same work queue.
 class GZMixingInterfaceMotor : public OutputModuleInterface
@@ -53,7 +52,7 @@ public:
 	static constexpr int MAX_ACTUATORS = MixingOutput::MAX_ACTUATORS;
 
 	GZMixingInterfaceMotor(gz::transport::Node &node, pthread_mutex_t &node_mutex) :
-		OutputModuleInterface(MODULE_NAME "-actuators-esc", px4::wq_configurations::rate_ctrl),
+		OutputModuleInterface(MODULE_NAME "-actuators-motor", px4::wq_configurations::rate_ctrl),
 		_node(node),
 		_node_mutex(node_mutex)
 	{}
@@ -85,7 +84,6 @@ private:
 
 	gz::transport::Node::Publisher _actuators_pub;
 
-	uORB::Publication<esc_status_s> _esc_status_pub{ORB_ID(esc_status)};
 	uORB::Publication<wheel_encoders_s> _wheel_encoders_pub{ORB_ID(wheel_encoders)};
 
 

@@ -43,7 +43,6 @@ bool GZMixingInterfaceMotor::init(const std::string &model_name)
 		return false;
 	}
 
-	// output eg /X500/command/motor_speed
 	std::string actuator_topic = "/model/" + model_name + "/command/motor_speed";
 	_actuators_pub = _node.Advertise<gz::msgs::Actuators>(actuator_topic);
 
@@ -111,6 +110,7 @@ void GZMixingInterfaceMotor::motorSpeedCallback(const gz::msgs::Actuators &actua
 	wheel_encoders_s wheel_encoders{};
 
 	for (int i = 0; i < actuators.velocity_size(); i++) {
+		// Convert from RPM to rad/s
 		wheel_encoders.wheel_speed[i] = (float)actuators.velocity(i)*(2.0f*M_PI_F/60.0f);
 	}
 
