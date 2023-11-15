@@ -39,6 +39,16 @@ param set-default SIM_GZ_EC_MIN2 0
 param set-default SIM_GZ_EC_MAX2 200
 param set-default SIM_GZ_EC_DIS2 100
 
+param set-default SIM_GZ_MT_FUNC1 101
+param set-default SIM_GZ_MT_MIN1 0
+param set-default SIM_GZ_MT_MAX1 200
+param set-default SIM_GZ_MT_DIS1 100
+
+param set-default SIM_GZ_MT_FUNC2 102
+param set-default SIM_GZ_MT_MIN2 0
+param set-default SIM_GZ_MT_MAX2 200
+param set-default SIM_GZ_MT_DIS2 100
+
 
 param set-default FD_ESCS_EN 0
 

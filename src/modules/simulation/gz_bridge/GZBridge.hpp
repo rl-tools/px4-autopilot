@@ -35,6 +35,7 @@
 
 #include "GZMixingInterfaceESC.hpp"
 #include "GZMixingInterfaceServo.hpp"
+#include "GZMixingInterfaceMotor.hpp"
 
 #include <px4_platform_common/atomic.h>
 #include <px4_platform_common/defines.h>
@@ -159,6 +160,7 @@ private:
 
 	GZMixingInterfaceESC   _mixing_interface_esc{_node, _node_mutex};
 	GZMixingInterfaceServo _mixing_interface_servo{_node, _node_mutex};
+	GZMixingInterfaceMotor   _mixing_interface_motor{_node, _node_mutex};
 
 	px4::atomic<uint64_t> _world_time_us{0};
 

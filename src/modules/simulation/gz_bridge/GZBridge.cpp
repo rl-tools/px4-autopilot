@@ -128,21 +128,6 @@ int GZBridge::init()
 		}
 	}
 
-	// temporary perfrivik
-
-	// std::string actuator_topic = "/model/" + _model_name + "/command/motor_speed";
-	// _actuators_pub = _node.Advertise<gz::msgs::Actuators>(actuator_topic);
-
-	// encoder data temporary
-	std::string encoder_topic = "/world/" + _world_name + "/model/" + _model_name + "/joint_state";
-
-	PX4_ERR("Encoder topic %s",  encoder_topic.c_str());
-
-	if (!_node.Subscribe(encoder_topic, &GZBridge::encoderCallback, this)) {
-		PX4_ERR("failed to subscribe to %s", encoder_topic.c_str());
-		return PX4_ERROR;
-	}
-
 	// clock
 	std::string clock_topic = "/world/" + _world_name + "/clock";
 
@@ -196,8 +181,6 @@ int GZBridge::init()
 		return PX4_ERROR;
 	}
 
-	// perfrivik temporary
-
 	if (!_mixing_interface_esc.init(_model_name)) {
 		PX4_ERR("failed to init ESC output");
 		return PX4_ERROR;
@@ -205,6 +188,11 @@ int GZBridge::init()
 
 	if (!_mixing_interface_servo.init(_model_name)) {
 		PX4_ERR("failed to init servo output");
+		return PX4_ERROR;
+	}
+
+	if (!_mixing_interface_motor.init(_model_name)) {
+		PX4_ERR("failed to init motor output");
 		return PX4_ERROR;
 	}
 
@@ -363,24 +351,6 @@ void GZBridge::clockCallback(const gz::msgs::Clock &clock)
 
 	pthread_mutex_unlock(&_node_mutex);
 }
-
-void GZBridge::encoderCallback(const gz::msgs::Model &model)
-{
-	pthread_mutex_lock(&_node_mutex);
-
-	for(int i = 0; i < 4; i++ ){
-		auto joint = model.joint(i);
-		_encoderCounts[i] = joint.axis1().position();
-		_motorSpeeds[i] = joint.axis1().velocity();
-	}
-
-	encoderDataPub();
-
-	pthread_mutex_unlock(&_node_mutex);
-}
-
-
-
 
 void GZBridge::barometerCallback(const gz::msgs::FluidPressure &air_pressure)
 {
@@ -724,6 +694,7 @@ void GZBridge::Run()
 
 		_mixing_interface_esc.stop();
 		_mixing_interface_servo.stop();
+		_mixing_interface_motor.stop();
 
 		exit_and_cleanup();
 		return;
@@ -737,33 +708,14 @@ void GZBridge::Run()
 
 		updateParams();
 
-
 		_mixing_interface_esc.updateParams();
 		_mixing_interface_servo.updateParams();
+		_mixing_interface_motor.updateParams();
 	}
-
 
 	ScheduleDelayed(10_ms);
 
 	pthread_mutex_unlock(&_node_mutex);
-}
-
-void GZBridge::encoderDataPub()
-{
-	// temporary, change this hardcoded encoder size
-
-	_wheel_encoders_msg.timestamp = hrt_absolute_time();
-
-
-	for (int i = 0; i < 4; i++) {
-
-		_wheel_encoders_msg.wheel_angle[i] =  _encoderCounts[i];
-		_wheel_encoders_msg.wheel_speed[i] = _motorSpeeds[i];
-
-	}
-
-	_wheel_encoders_pub.publish(_wheel_encoders_msg);
-
 }
 
 int GZBridge::print_status()
@@ -773,6 +725,9 @@ int GZBridge::print_status()
 
 	PX4_INFO_RAW("Servo outputs:\n");
 	_mixing_interface_servo.mixingOutput().printStatus();
+
+	PX4_INFO_RAW("Motor outputs:\n");
+	_mixing_interface_motor.mixingOutput().printStatus();
 
 	return 0;
 }
