@@ -65,6 +65,11 @@ int DifferentialDriveControl::task_spawn(int argc, char *argv[])
 	return 0;
 }
 
+void DifferentialDriveControl::start()
+{
+	ScheduleOnInterval(10_ms); // 100 Hz
+}
+
 void DifferentialDriveControl::Run()
 {
 
@@ -143,11 +148,6 @@ void DifferentialDriveControl::vehicle_control_mode_poll()
 	if (_vehicle_control_mode_sub.updated()) {
 		_vehicle_control_mode_sub.copy(&_vehicle_control_mode);
 	}
-}
-
-void DifferentialDriveControl::start()
-{
-	ScheduleOnInterval(10_ms); // 100 Hz
 }
 
 int DifferentialDriveControl::print_status()

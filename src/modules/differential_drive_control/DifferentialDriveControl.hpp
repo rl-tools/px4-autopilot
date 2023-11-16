@@ -103,12 +103,7 @@ private:
 
 	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
 	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
-	matrix::Vector2f _output_forwards{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 
-	float _forwards_velocity{0.0f};
-	float _angular_velocity{0.0f};
-
-	float _dt{0.0};
 	float _last_timestamp{0.0};
 	float _current_timestamp{0.0};
 
