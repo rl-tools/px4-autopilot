@@ -51,9 +51,8 @@ public:
 
 private:
 
-	// Input & Output (Don't really need input tbh, but lets see)
-	matrix::Vector2f _input{0.0f, 0.0f};  // input_[0] -> Vx [m/s], input_[1] -> Omega [rad/s]
-	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
+	matrix::Vector2f _input{0.0f, 0.0f};
+	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output(0) -> Right Motor Speed [rad/s], _output(1) -> Left Motor Speed [rad/s]
 	matrix::Vector2f _output_forwards{0.0f, 0.0f}; // _output[0] -> Linear Velocity in X [rad/s], _output[1] -> Angular Velocity in Z [rad/s]
 
 	float _linear_vel_x{0.0f};
