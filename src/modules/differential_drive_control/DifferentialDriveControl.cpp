@@ -89,6 +89,7 @@ void DifferentialDriveControl::Run()
 			if (_arming_state != vehicle_status.arming_state) {
 				_arming_state = vehicle_status.arming_state;
 			}
+
 			bool system_calibrating = vehicle_status.calibration_enabled;
 
 			if (system_calibrating != _system_calibrating) {
@@ -105,15 +106,16 @@ void DifferentialDriveControl::Run()
 	}
 
 
-	if(_vehicle_control_mode.flag_control_manual_enabled && _vehicle_control_mode.flag_armed){
+	if (_vehicle_control_mode.flag_control_manual_enabled && _vehicle_control_mode.flag_armed) {
 		if (_manual_control_setpoint_sub.updated()) {
 			manual_control_setpoint_s manual_control_setpoint{};
 			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
 
 			// directly get the input from the manual control setpoint (joystick)
-			_input_feed_forward(0) = manual_control_setpoint.throttle*_param_rdd_max_forwards_velocity.get();
-			_input_feed_forward(1) = manual_control_setpoint.roll*_param_rdd_max_angular_velocity.get();
+			_input_feed_forward(0) = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
+			_input_feed_forward(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
 		}
+
 	} else {
 		// if the system is in an error state, stop the vehicle
 		_input_feed_forward = {0.0f, 0.0f};
@@ -133,12 +135,13 @@ void DifferentialDriveControl::Run()
 void DifferentialDriveControl::publishRateControl()
 {
 	// Superpose Linear and Angular velocity vector
-	float max_angular_wheel_speed = ((_param_rdd_max_forwards_velocity.get() + (_param_rdd_max_angular_velocity.get()*_param_rdd_wheel_base.get()/2)) / _param_rdd_wheel_radius.get());
+	float max_angular_wheel_speed = ((_param_rdd_max_forwards_velocity.get() + (_param_rdd_max_angular_velocity.get() *
+					  _param_rdd_wheel_base.get() / 2)) / _param_rdd_wheel_radius.get());
 
 	_actuator_motors.timestamp = hrt_absolute_time();
 	_actuator_motors.reversible_flags = 3;
-	_actuator_motors.control[0] = _output_inverse(0)/max_angular_wheel_speed;
-	_actuator_motors.control[1] = _output_inverse(1)/max_angular_wheel_speed;
+	_actuator_motors.control[0] = _output_inverse(0) / max_angular_wheel_speed;
+	_actuator_motors.control[1] = _output_inverse(1) / max_angular_wheel_speed;
 
 	_outputs_pub.publish(_actuator_motors);
 }

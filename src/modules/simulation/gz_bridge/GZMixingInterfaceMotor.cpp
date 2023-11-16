@@ -111,7 +111,7 @@ void GZMixingInterfaceMotor::motorSpeedCallback(const gz::msgs::Actuators &actua
 
 	for (int i = 0; i < actuators.velocity_size(); i++) {
 		// Convert from RPM to rad/s
-		wheel_encoders.wheel_speed[i] = (float)actuators.velocity(i)*(2.0f*M_PI_F/60.0f);
+		wheel_encoders.wheel_speed[i] = (float)actuators.velocity(i) * (2.0f * M_PI_F / 60.0f);
 	}
 
 	if (actuators.velocity_size() > 0) {

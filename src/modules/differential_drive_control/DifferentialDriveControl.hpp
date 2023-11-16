@@ -61,7 +61,8 @@
 namespace differential_drive_control
 {
 
-class DifferentialDriveControl : public ModuleBase<DifferentialDriveControl>, public ModuleParams, public px4::ScheduledWorkItem
+class DifferentialDriveControl : public ModuleBase<DifferentialDriveControl>, public ModuleParams,
+	public px4::ScheduledWorkItem
 {
 public:
 	DifferentialDriveControl();

@@ -45,7 +45,7 @@ public:
 	void computeForwardsKinematics();
 	void setWheelBase(float wheel_base);
 	void setWheelRadius(float wheel_radius);
-	void setInput(const matrix::Vector2f& input, bool inverse);
+	void setInput(const matrix::Vector2f &input, bool inverse);
 
 	matrix::Vector2f getOutput(bool inverse) const;
 
