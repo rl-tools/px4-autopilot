@@ -659,14 +659,14 @@
           <control_joint_name>servo_2</control_joint_name>
       <control_joint_rad_to_cl>-12.0</control_joint_rad_to_cl>
     </plugin>
-    <!-- <plugin
+    <plugin
       filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
       <joint_name>servo_2</joint_name>
       <sub_topic>servo_2</sub_topic>
-    </plugin> -->
+    </plugin>
     <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
-      <jointName>servo_2</jointName>
-      <linkName>servo_2</linkName>
+      <jointName>rotor_0_joint</jointName>
+      <linkName>rotor_0</linkName>
       <turningDirection>ccw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
