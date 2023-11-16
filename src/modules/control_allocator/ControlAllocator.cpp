@@ -235,7 +235,7 @@ ControlAllocator::update_effectiveness_source()
 			break;
 
 		case EffectivenessSource::ROVER_DIFFERENTIAL:
-			// tmp = new ActuatorEffectivenessRoverDifferential();
+			PX4_INFO("actuator_motors message is published directly from the differential drive controller");
 			break;
 
 		case EffectivenessSource::FIXED_WING:
