@@ -20,7 +20,11 @@ control_allocator start
 #
 # Start attitude controllers.
 #
-# rover_pos_control start
+rover_pos_control start
+
+#
+# Start manual rover differential drive controller.
+#
 differential_drive_control start
 
 
