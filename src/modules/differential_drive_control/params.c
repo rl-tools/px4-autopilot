@@ -69,7 +69,7 @@ PARAM_DEFINE_FLOAT(RDD_WHEEL_RADIUS, 0.0686f);
  * @decimal 2
  * @group Rover Differential Drive
  */
-PARAM_DEFINE_FLOAT(RDD_MAX_FORW_VEL, 1.0f);
+PARAM_DEFINE_FLOAT(RDD_MAX_FORW_VEL, 0.5f);
 
 /**
  * Max Angular Velocity
@@ -82,7 +82,7 @@ PARAM_DEFINE_FLOAT(RDD_MAX_FORW_VEL, 1.0f);
  * @decimal 2
  * @group Rover Differential Drive
  */
-PARAM_DEFINE_FLOAT(RDD_MAX_ANG_VEL, 0.5f);
+PARAM_DEFINE_FLOAT(RDD_MAX_ANG_VEL, 0.3f);
 
 
 
