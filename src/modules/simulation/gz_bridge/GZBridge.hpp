@@ -107,33 +107,6 @@ private:
 	void poseInfoCallback(const gz::msgs::Pose_V &pose);
 	void odometryCallback(const gz::msgs::OdometryWithCovariance &odometry);
 
-
-
-	// perfrivik temporary
-
-	void directMotorSub();
-	void directMotorPub();
-	void encoderCallback(const gz::msgs::Model &model);
-
-	matrix::Vector2f 			_input{0.0f, 0.0f};
-
-	gz::transport::Node::Publisher _actuators_pub;
-
-
-
-	uORB::Publication<wheel_encoders_s> _wheel_encoders_pub{ORB_ID(wheel_encoders)};
-
-
-	wheel_encoders_s 			_wheel_encoders_msg;
-
-	float _lastEncoderCount[4] = {0.0, 0.0, 0.0, 0.0};
-	float _encoderCounts[4] = {0.0, 0.0, 0.0, 0.0};
-	float _motorSpeeds[4] = {0.0, 0.0, 0.0, 0.0};
-
-	void encoderCallback();
-	void encoderDataPub();
-
-
 	/**
 	*
 	* Convert a quaterion from FLU_to_ENU frames (ROS convention)
