@@ -39,12 +39,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<!-- <script>
-		  <name>Gazebo/Grey</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script> -->
-		<diffuse>0.2 0.4 0.9</diffuse>
-		<specular>0.2 0.4 0.9</specular>
+		<diffuse>1.0 1.0 1.0</diffuse>
+		<specular>1.0 1.0 1.0</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__top_link_visual_1'>
@@ -56,12 +52,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<!-- <script>
-		  <name>Gazebo/White</name>
-		  <uri>file://media/materials/scripts/gazebo.material</uri>
-		</script> -->
-		<diffuse>0.2 0.4 0.9</diffuse>
-		<specular>0.2 0.4 0.9</specular>
+		<diffuse>1.0 1.0 1.0</diffuse>
+		<specular>1.0 1.0 1.0</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__battery_link_visual_2'>
@@ -73,8 +65,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<diffuse>0.2 0.4 0.9</diffuse>
-		<specular>0.2 0.4 0.9</specular>
+		<diffuse>0.0 0.0 0.0</diffuse>
+		<specular>0.5 0.5 0.5</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__housing_link_visual_3'>
@@ -86,8 +78,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<diffuse>0.2 0.4 0.9</diffuse>
-		<specular>0.2 0.4 0.9</specular>
+		<diffuse>0.0 0.0 0.0</diffuse>
+		<specular>0.5 0.5 0.5</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__l_antenna_link_visual_4'>
@@ -99,8 +91,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<diffuse>0.2 0.4 0.9</diffuse>
-		<specular>0.2 0.4 0.9</specular>
+		<diffuse>0.0 0.0 0.0</diffuse>
+		<specular>0.5 0.5 0.5</specular>
 	      </material>
 	    </visual>
 	    <visual name='odom_fixed_joint_lump__r_antenna_link_visual_5'>
@@ -112,8 +104,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<diffuse>0.2 0.4 0.9</diffuse>
-		<specular>0.2 0.4 0.9</specular>
+		<diffuse>0.0 0.0 0.0</diffuse>
+		<specular>0.5 0.5 0.5</specular>
 	      </material>
 	    </visual>
 	    <velocity_decay/>
@@ -140,6 +132,90 @@
 		</air_pressure>
 	      </sensor>
 	  </link>
+	  <link name='lf_wheel_link'>
+		<pose>0.15 0.16317 0.0215 0 -0 0</pose>
+		<inertial>
+		  <pose>0 0 0 1.57079632679 0 0</pose>
+		  <mass>0.414</mass>
+		  <inertia>
+		    <ixx>0.00068682</ixx>
+		    <ixy>0</ixy>
+		    <ixz>0</ixz>
+		    <iyy>0.00068682</iyy>
+		    <iyz>0</iyz>
+		    <izz>0.00097299</izz>
+		  </inertia>
+		</inertial>
+		<collision name='lf_wheel_link_collision'>
+		  <pose>0 0 0 1.57079632679 0 0</pose>
+		  <geometry>
+		    <cylinder>
+		      <radius>0.0686</radius>
+		      <length>0.0762</length>
+		    </cylinder>
+		  </geometry>
+		  <max_contacts>1</max_contacts>
+		  <surface>
+		    <friction>
+		      <torsional>
+			<coefficient>0.25</coefficient>
+			<use_patch_radius>1</use_patch_radius>
+			<surface_radius>0.0686</surface_radius>
+		      </torsional>
+		      <ode>
+			<mu>1.0</mu>
+			<mu2>1.0</mu2>
+			<fdir1>1 0 0</fdir1>
+			<slip1>0.0</slip1>
+			<slip2>0.0</slip2>
+		      </ode>
+		    </friction>
+		    <bounce>
+		      <restitution_coefficient>0</restitution_coefficient>
+		      <threshold>1e6</threshold>
+		    </bounce>
+		    <contact>
+		      <ode>
+			<min_depth>0.001</min_depth>
+			<max_vel>0.0</max_vel>
+			<kp>1.0e6</kp>
+			<kd>100.0</kd>
+		      </ode>
+		    </contact>
+		  </surface>
+		</collision>
+		<visual name='lf_wheel_link_visual'>
+		  <pose>0 0 0 0 -0 0</pose>
+		  <geometry>
+		    <mesh>
+		      <scale>1 1 1</scale>
+		      <uri>model://r1_rover/meshes/wheel_link.STL</uri>
+		    </mesh>
+		  </geometry>
+		  <material>
+		    <diffuse>0.0 0.0 0.0</diffuse>
+		    <specular>0.5 0.5 0.5</specular>
+		  </material>
+		</visual>
+		<gravity>1</gravity>
+		<velocity_decay/>
+	      </link>
+	      <joint name='motor_0' type='revolute'>
+		<child>lf_wheel_link</child>
+		<parent>base_link</parent>
+		<axis>
+		  <xyz>0 1 0</xyz>
+		  <limit>
+		    <lower>-1e+16</lower>
+		    <upper>1e+16</upper>
+		  </limit>
+		  <dynamics>
+		    <spring_reference>0</spring_reference>
+		    <spring_stiffness>0</spring_stiffness>
+		  </dynamics>
+		  <use_parent_model_frame>1</use_parent_model_frame>
+		</axis>
+	      </joint>
 	  <link name='lb_wheel_link'>
 	    <pose>-0.15 0.16317 0.0215 0 -0 0</pose>
 	    <inertial>
@@ -172,7 +248,7 @@
 		  </torsional>
 		  <ode>
 		    <mu>1.0</mu>
-		    <mu2>0.45</mu2>
+		    <mu2>1.0</mu2>
 		    <fdir1>1 0 0</fdir1>
 		    <slip1>0.0</slip1>
 		    <slip2>0.0</slip2>
@@ -201,20 +277,13 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<diffuse>0.8 0.4 0.9</diffuse>
-		<specular>0.8 0.4 0.9</specular>
+		<diffuse>0.0 0.0 0.0</diffuse>
+		<specular>0.5 0.5 0.5</specular>
 	      </material>
 	    </visual>
 	    <gravity>1</gravity>
 	    <velocity_decay/>
 	  </link>
-	  <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-	  	<joint_name>motor_0</joint_name>
-	  	<sub_topic>command/motor_speed</sub_topic>
-		<use_actuator_msg>true</use_actuator_msg>
-		<actuator_number>0</actuator_number>
-	  	<p_gain>10.0</p_gain>
-	  </plugin>
 	  <joint name='motor_1' type='revolute'>
 	    <child>lb_wheel_link</child>
 	    <parent>base_link</parent>
@@ -231,112 +300,90 @@
 	      <use_parent_model_frame>1</use_parent_model_frame>
 	    </axis>
 	  </joint>
-	  <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-		<joint_name>motor_1</joint_name>
-		<sub_topic>command/motor_speed</sub_topic>
-	      <use_actuator_msg>true</use_actuator_msg>
-	      <actuator_number>0</actuator_number>
-		<p_gain>10.0</p_gain>
-         </plugin>
-	 <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-		<joint_name>motor_3</joint_name>
-		<sub_topic>command/motor_speed</sub_topic>
-	      <use_actuator_msg>true</use_actuator_msg>
-	      <actuator_number>1</actuator_number>
-		<p_gain>10.0</p_gain>
-         </plugin>
-	 <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-		<joint_name>motor_2</joint_name>
-		<sub_topic>command/motor_speed</sub_topic>
-	      <use_actuator_msg>true</use_actuator_msg>
-	      <actuator_number>1</actuator_number>
-		<p_gain>10.0</p_gain>
-         </plugin>
-	 <!-- <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/> -->
-	 <link name='lf_wheel_link'>
-	    <pose>0.15 0.16317 0.0215 0 -0 0</pose>
-	    <inertial>
-	      <pose>0 0 0 1.57079632679 0 0</pose>
-	      <mass>0.414</mass>
-	      <inertia>
-		<ixx>0.00068682</ixx>
-		<ixy>0</ixy>
-		<ixz>0</ixz>
-		<iyy>0.00068682</iyy>
-		<iyz>0</iyz>
-		<izz>0.00097299</izz>
-	      </inertia>
-	    </inertial>
-	    <collision name='lf_wheel_link_collision'>
-	      <pose>0 0 0 1.57079632679 0 0</pose>
-	      <geometry>
-		<cylinder>
-		  <radius>0.0686</radius>
-		  <length>0.0762</length>
-		</cylinder>
-	      </geometry>
-	      <max_contacts>1</max_contacts>
-	      <surface>
-		<friction>
-		  <torsional>
-		    <coefficient>0.25</coefficient>
-		    <use_patch_radius>1</use_patch_radius>
-		    <surface_radius>0.0686</surface_radius>
-		  </torsional>
-		  <ode>
-		    <mu>1.0</mu>
-		    <mu2>0.45</mu2>
-		    <fdir1>1 0 0</fdir1>
-		    <slip1>0.0</slip1>
-		    <slip2>0.0</slip2>
-		  </ode>
-		</friction>
-		<bounce>
-		  <restitution_coefficient>0</restitution_coefficient>
-		  <threshold>1e6</threshold>
-		</bounce>
-		<contact>
-		  <ode>
-		    <min_depth>0.001</min_depth>
-		    <max_vel>0.0</max_vel>
-		    <kp>1.0e6</kp>
-		    <kd>100.0</kd>
-		  </ode>
-		</contact>
-	      </surface>
-	    </collision>
-	    <visual name='lf_wheel_link_visual'>
-	      <pose>0 0 0 0 -0 0</pose>
-	      <geometry>
-		<mesh>
-		  <scale>1 1 1</scale>
-		  <uri>model://r1_rover/meshes/wheel_link.STL</uri>
-		</mesh>
-	      </geometry>
-	      <material>
-		<diffuse>0.8 0.4 0.9</diffuse>
-		<specular>0.8 0.4 0.9</specular>
-	      </material>
-	    </visual>
-	    <gravity>1</gravity>
-	    <velocity_decay/>
-	  </link>
-	  <joint name='motor_0' type='revolute'>
-	    <child>lf_wheel_link</child>
-	    <parent>base_link</parent>
-	    <axis>
-	      <xyz>0 1 0</xyz>
-	      <limit>
-		<lower>-1e+16</lower>
-		<upper>1e+16</upper>
-	      </limit>
-	      <dynamics>
-		<spring_reference>0</spring_reference>
-		<spring_stiffness>0</spring_stiffness>
-	      </dynamics>
-	      <use_parent_model_frame>1</use_parent_model_frame>
-	    </axis>
-	  </joint>
+	  <link name='rf_wheel_link'>
+		<pose>0.15 -0.16317 0.0215 0 -0 0</pose>
+		<inertial>
+		  <pose>0 0 0 1.57079632679 0 0</pose>
+		  <mass>0.414</mass>
+		  <inertia>
+		    <ixx>0.00068682</ixx>
+		    <ixy>0</ixy>
+		    <ixz>0</ixz>
+		    <iyy>0.00068682</iyy>
+		    <iyz>0</iyz>
+		    <izz>0.00097299</izz>
+		  </inertia>
+		</inertial>
+		<collision name='rf_wheel_link_collision'>
+		  <pose>0 0 0 1.57079632679 0 0</pose>
+		  <geometry>
+		    <cylinder>
+		      <radius>0.0686</radius>
+		      <length>0.0762</length>
+		    </cylinder>
+		  </geometry>
+		  <max_contacts>1</max_contacts>
+		  <surface>
+		    <friction>
+		      <torsional>
+			<coefficient>0.25</coefficient>
+			<use_patch_radius>1</use_patch_radius>
+			<surface_radius>0.0686</surface_radius>
+		      </torsional>
+		      <ode>
+			<mu>1.0</mu>
+			<mu2>1.0</mu2>
+			<fdir1>1 0 0</fdir1>
+			<slip1>0.0</slip1>
+			<slip2>0.0</slip2>
+		      </ode>
+		    </friction>
+		    <bounce>
+		      <restitution_coefficient>0</restitution_coefficient>
+		      <threshold>1e6</threshold>
+		    </bounce>
+		    <contact>
+		      <ode>
+			<min_depth>0.001</min_depth>
+			<max_vel>0.0</max_vel>
+			<kp>1.0e6</kp>
+			<kd>100.0</kd>
+		      </ode>
+		    </contact>
+		  </surface>
+		</collision>
+		<visual name='rf_wheel_link_visual'>
+		  <pose>0 0 0 0 -0 0</pose>
+		  <geometry>
+		    <mesh>
+		      <scale>1 1 1</scale>
+		      <uri>model://r1_rover/meshes/wheel_link.STL</uri>
+		    </mesh>
+		  </geometry>
+		  <material>
+		    <diffuse>0.0 0.0 0.0</diffuse>
+		    <specular>0.5 0.5 0.5</specular>
+		  </material>
+		</visual>
+		<gravity>1</gravity>
+		<velocity_decay/>
+	      </link>
+	      <joint name='motor_2' type='revolute'>
+		<child>rf_wheel_link</child>
+		<parent>base_link</parent>
+		<axis>
+		  <xyz>0 1 0</xyz>
+		  <limit>
+		    <lower>-1e+16</lower>
+		    <upper>1e+16</upper>
+		  </limit>
+		  <dynamics>
+		    <spring_reference>0</spring_reference>
+		    <spring_stiffness>0</spring_stiffness>
+		  </dynamics>
+		  <use_parent_model_frame>1</use_parent_model_frame>
+		</axis>
+	      </joint>
 	  <link name='rb_wheel_link'>
 	    <pose>-0.15 -0.16317 0.0215 0 -0 0</pose>
 	    <inertial>
@@ -369,7 +416,7 @@
 		  </torsional>
 		  <ode>
 		    <mu>1.0</mu>
-		    <mu2>0.45</mu2>
+		    <mu2>1.0</mu2>
 		    <fdir1>1 0 0</fdir1>
 		    <slip1>0.0</slip1>
 		    <slip2>0.0</slip2>
@@ -396,8 +443,8 @@
 		</mesh>
 	      </geometry>
 	      <material>
-		<diffuse>0.8 0.4 0.9</diffuse>
-		<specular>0.8 0.4 0.9</specular>
+		<diffuse>0.0 0.0 0.0</diffuse>
+		<specular>0.5 0.5 0.5</specular>
 	      </material>
 	    </visual>
 	    <gravity>1</gravity>
@@ -419,91 +466,35 @@
 	      <use_parent_model_frame>1</use_parent_model_frame>
 	    </axis>
 	  </joint>
-	  <link name='rf_wheel_link'>
-	    <pose>0.15 -0.16317 0.0215 0 -0 0</pose>
-	    <inertial>
-	      <pose>0 0 0 1.57079632679 0 0</pose>
-	      <mass>0.414</mass>
-	      <inertia>
-		<ixx>0.00068682</ixx>
-		<ixy>0</ixy>
-		<ixz>0</ixz>
-		<iyy>0.00068682</iyy>
-		<iyz>0</iyz>
-		<izz>0.00097299</izz>
-	      </inertia>
-	    </inertial>
-	    <collision name='rf_wheel_link_collision'>
-	      <pose>0 0 0 1.57079632679 0 0</pose>
-	      <geometry>
-		<cylinder>
-		  <radius>0.0686</radius>
-		  <length>0.0762</length>
-		</cylinder>
-	      </geometry>
-	      <max_contacts>1</max_contacts>
-	      <surface>
-		<friction>
-		  <torsional>
-		    <coefficient>0.25</coefficient>
-		    <use_patch_radius>1</use_patch_radius>
-		    <surface_radius>0.0686</surface_radius>
-		  </torsional>
-		  <ode>
-		    <mu>1.0</mu>
-		    <mu2>0.45</mu2>
-		    <fdir1>1 0 0</fdir1>
-		    <slip1>0.0</slip1>
-		    <slip2>0.0</slip2>
-		  </ode>
-		</friction>
-		<bounce>
-		  <restitution_coefficient>0</restitution_coefficient>
-		  <threshold>1e6</threshold>
-		</bounce>
-		<contact>
-		  <ode>
-		    <min_depth>0.001</min_depth>
-		    <max_vel>0.0</max_vel>
-		    <kp>1.0e6</kp>
-		    <kd>100.0</kd>
-		  </ode>
-		</contact>
-	      </surface>
-	    </collision>
-	    <visual name='rf_wheel_link_visual'>
-	      <pose>0 0 0 0 -0 0</pose>
-	      <geometry>
-		<mesh>
-		  <scale>1 1 1</scale>
-		  <uri>model://r1_rover/meshes/wheel_link.STL</uri>
-		</mesh>
-	      </geometry>
-	      <material>
-		<diffuse>0.8 0.4 0.9</diffuse>
-		<specular>0.8 0.4 0.9</specular>
-	      </material>
-	    </visual>
-	    <gravity>1</gravity>
-	    <velocity_decay/>
-	  </link>
-	  <joint name='motor_2' type='revolute'>
-	    <child>rf_wheel_link</child>
-	    <parent>base_link</parent>
-	    <axis>
-	      <xyz>0 1 0</xyz>
-	      <limit>
-		<lower>-1e+16</lower>
-		<upper>1e+16</upper>
-	      </limit>
-	      <dynamics>
-		<spring_reference>0</spring_reference>
-		<spring_stiffness>0</spring_stiffness>
-	      </dynamics>
-	      <use_parent_model_frame>1</use_parent_model_frame>
-	    </axis>
-	  </joint>
 	  <static>0</static>
+	  <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+		<joint_name>motor_0</joint_name>
+		<sub_topic>command/motor_speed</sub_topic>
+	      <use_actuator_msg>true</use_actuator_msg>
+	      <actuator_number>0</actuator_number>
+		<p_gain>10.0</p_gain>
+	</plugin>
+	<plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+	      <joint_name>motor_1</joint_name>
+	      <sub_topic>command/motor_speed</sub_topic>
+	    <use_actuator_msg>true</use_actuator_msg>
+	    <actuator_number>0</actuator_number>
+	      <p_gain>10.0</p_gain>
+       </plugin>
+       <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+	      <joint_name>motor_2</joint_name>
+	      <sub_topic>command/motor_speed</sub_topic>
+	    <use_actuator_msg>true</use_actuator_msg>
+	    <actuator_number>1</actuator_number>
+	      <p_gain>10.0</p_gain>
+       </plugin>
+       <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
+	      <joint_name>motor_3</joint_name>
+	      <sub_topic>command/motor_speed</sub_topic>
+	    <use_actuator_msg>true</use_actuator_msg>
+	    <actuator_number>1</actuator_number>
+	      <p_gain>10.0</p_gain>
+       </plugin>
 	  <plugin
 	  filename="gz-sim-joint-state-publisher-system"
 	  name="gz::sim::systems::JointStatePublisher">
@@ -512,125 +503,5 @@
 		<joint_name>motor_2</joint_name>
 		<joint_name>motor_3</joint_name>
  	  </plugin>
-
-	  <!-- <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-		<left_joint>servo_0</left_joint>
-		<left_joint>servo_1</left_joint>
-		<right_joint>servo_2</right_joint>
-		<right_joint>servo_3</right_joint>
-		<wheel_seperation>0.5</wheel_seperation>
-		<wheel_radius>0.2</wheel_radius>
-		<odom_publish_frequency>100</odom_publish_frequency>
-	  </plugin> -->
-
-
-	  <!-- <plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
-	    <robotNamespace/>
-	    <pubRate>20</pubRate>
-	    <noiseDensity>0.0004</noiseDensity>
-	    <randomWalk>6.4e-06</randomWalk>
-	    <biasCorrelationTime>600</biasCorrelationTime>
-	    <magTopic>/mag</magTopic>
-	  </plugin>
-	  <plugin name='barometer_plugin' filename='libgazebo_barometer_plugin.so'>
-	    <robotNamespace/>
-	    <pubRate>10</pubRate>
-	    <baroTopic>/baro</baroTopic>
-	  </plugin>
-	  <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
-	    <robotNamespace></robotNamespace>
-	    <imuSubTopic>/imu</imuSubTopic>
-	    <magSubTopic>/mag</magSubTopic>
-	    <baroSubTopic>/baro</baroSubTopic>
-	    <mavlink_addr>INADDR_ANY</mavlink_addr>
-	    <mavlink_tcp_port>{{ mavlink_tcp_port }}</mavlink_tcp_port>
-	    <mavlink_udp_port>{{ mavlink_udp_port }}</mavlink_udp_port>
-	    <serialEnabled>false</serialEnabled>
-	    <serialDevice>/dev/ttyACM0</serialDevice>
-	    <baudRate>921600</baudRate>
-	    <qgc_addr>INADDR_ANY</qgc_addr>
-	    <qgc_udp_port>14550</qgc_udp_port>
-	    <sdk_addr>INADDR_ANY</sdk_addr>
-	    <sdk_udp_port>14540</sdk_udp_port>
-	    <hil_mode>false</hil_mode>
-	    <hil_state_level>false</hil_state_level>
-	    <enable_lockstep>true</enable_lockstep>
-	    <use_tcp>true</use_tcp>
-	    <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
-	    <control_channels>
-	      <channel name="left_front_wheel_drive">
-		<input_index>0</input_index>
-		<input_offset>0</input_offset>
-		<input_scaling>40</input_scaling>
-		<zero_position_disarmed>0</zero_position_disarmed>
-		<zero_position_armed>0</zero_position_armed>
-		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_0</joint_name>
-		<joint_control_pid>
-		  <p>0.1</p>
-		  <i>0</i>
-		  <d>0</d>
-		  <iMax>800</iMax>
-		  <iMin>-800</iMin>
-		  <cmdMax>1200</cmdMax>
-		  <cmdMin>-1200</cmdMin>
-		</joint_control_pid>
-	      </channel>
-	      <channel name="left_back_wheel_drive">
-		<input_index>1</input_index>
-		<input_offset>0</input_offset>
-		<input_scaling>40</input_scaling>
-		<zero_position_disarmed>0</zero_position_disarmed>
-		<zero_position_armed>0</zero_position_armed>
-		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_1</joint_name>
-		<joint_control_pid>
-		  <p>0.1</p>
-		  <i>0</i>
-		  <d>0</d>
-		  <iMax>800</iMax>
-		  <iMin>-800</iMin>
-		  <cmdMax>1200</cmdMax>
-		  <cmdMin>-1200</cmdMin>
-		</joint_control_pid>
-	      </channel>
-	      <channel name="right_front_wheel_drive">
-		<input_index>5</input_index>
-		<input_offset>0</input_offset>
-		<input_scaling>40</input_scaling>
-		<zero_position_disarmed>0</zero_position_disarmed>
-		<zero_position_armed>0</zero_position_armed>
-		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_2</joint_name>
-		<joint_control_pid>
-		  <p>0.1</p>
-		  <i>0</i>
-		  <d>0</d>
-		  <iMax>800</iMax>
-		  <iMin>-800</iMin>
-		  <cmdMax>1200</cmdMax>
-		  <cmdMin>-1200</cmdMin>
-		</joint_control_pid>
-	      </channel>
-	      <channel name="right_back_wheel_drive">
-		<input_index>6</input_index>
-		<input_offset>0</input_offset>
-		<input_scaling>40</input_scaling>
-		<zero_position_disarmed>0</zero_position_disarmed>
-		<zero_position_armed>0</zero_position_armed>
-		<joint_control_type>velocity</joint_control_type>
-		<joint_name>servo_3</joint_name>
-		<joint_control_pid>
-		  <p>0.1</p>
-		  <i>0</i>
-		  <d>0</d>
-		  <iMax>800</iMax>
-		  <iMin>-800</iMin>
-		  <cmdMax>1200</cmdMax>
-		  <cmdMin>-1200</cmdMin>
-		</joint_control_pid>
-	      </channel>
-	    </control_channels>
-	  </plugin> -->
 	</model>
       </sdf>
