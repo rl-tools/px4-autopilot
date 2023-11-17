@@ -57,6 +57,11 @@ ControlAllocator::ControlAllocator() :
 	_control_allocator_status_pub[0].advertise();
 	_control_allocator_status_pub[1].advertise();
 
+	_actuator_motors_pub.advertise();
+	_actuator_servos_pub.advertise();
+	_actuator_servos_trim_pub.advertise();
+
+
 	for (int i = 0; i < MAX_NUM_MOTORS; ++i) {
 		char buffer[17];
 		snprintf(buffer, sizeof(buffer), "CA_R%u_SLEW", i);
