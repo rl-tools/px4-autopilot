@@ -4,7 +4,7 @@
 # @type Rover
 # @class Rover
 
-. ${R}etc/init.d/rc.rover_defaults
+. ${R}etc/init.d/rc.rover_differential_defaults
 
 PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
 PX4_GZ_WORLD=${PX4_GZ_WORLD:=default}
