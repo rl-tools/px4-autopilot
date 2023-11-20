@@ -32,6 +32,9 @@ publications:
   - topic: /fmu/out/position_setpoint_triplet
     type: px4_msgs::msg::PositionSetpointTriplet
 
+  - topic: /fmu/out/rover_cruise_control_state
+    type: px4_msgs::msg::RoverCruiseControlState
+
   - topic: /fmu/out/sensor_combined
     type: px4_msgs::msg::SensorCombined
 
@@ -72,6 +75,12 @@ publications:
 subscriptions:
   - topic: /fmu/in/register_ext_component_request
     type: px4_msgs::msg::RegisterExtComponentRequest
+
+  - topic: /fmu/in/rover_cruise_control_velocity
+    type: px4_msgs::msg::RoverCruiseControlVelocity
+
+  - topic: /fmu/in/differential_drive_setpoint
+    type: px4_msgs::msg::DifferentialDriveSetpoint
 
   - topic: /fmu/in/unregister_ext_component
     type: px4_msgs::msg::UnregisterExtComponent

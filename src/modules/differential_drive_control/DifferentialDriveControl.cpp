@@ -81,6 +81,7 @@ void DifferentialDriveControl::Run()
 	_current_timestamp = hrt_absolute_time();
 
 	vehicle_control_mode_poll();
+	cruise_control_poll();
 
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
@@ -112,29 +113,28 @@ void DifferentialDriveControl::Run()
 			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
 
 			// Manual mode
-			if (_vehicle_control_mode.flag_control_manual_enabled && !_vehicle_control_mode.flag_control_altitude_enabled) {
+			if (_vehicle_control_mode.flag_control_manual_enabled) {
 				// directly get the input from the manual control setpoint (joystick)
-				_input_feed_forward(0) = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
-				_input_feed_forward(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
 
-				// Temporary Cruise Control mode
+				_differential_drive_setpoint.timestamp = hrt_absolute_time();
 
-			} else if (_vehicle_control_mode.flag_control_altitude_enabled) {
+				_differential_drive_setpoint.velocity = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
+				_differential_drive_setpoint.yaw = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
 
-				// Make sure we don't request more velocity than we can deliver
-				if (_input_feed_forward(0) >= _param_rdd_max_forwards_velocity.get() && (manual_control_setpoint.throttle >= 0.0f)) {
-					_input_feed_forward(0) = _param_rdd_max_forwards_velocity.get();
-
-				} else if (_input_feed_forward(0) <= -_param_rdd_max_forwards_velocity.get()
-					   && (manual_control_setpoint.throttle <= 0.0f)) {
-					_input_feed_forward(0) = -_param_rdd_max_forwards_velocity.get();
-
-				} else {
-					_input_feed_forward(0) = _input_feed_forward(0) + (manual_control_setpoint.throttle) * _param_rdd_cruise_gain.get();
-				}
-
-				_input_feed_forward(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
+				_differential_drive_setpoint_pub.publish(_differential_drive_setpoint);
 			}
+		}
+
+		// if manual is not enabled, it will look for the cruise control setpoint topic differential_drive_setpoint and subscribe to it from a ROS2 mode
+		if (_differential_drive_setpoint_sub.updated()) {
+			_differential_drive_setpoint_sub.copy(&_differential_drive_setpoint);
+
+			_velocity_control_inputs(0) = _differential_drive_setpoint.velocity;
+			_velocity_control_inputs(1) = _differential_drive_setpoint.yaw;
+
+		} else if (_differential_drive_setpoint.timestamp <= 100_ms) {
+			_velocity_control_inputs(0) = 0.0f;
+			_velocity_control_inputs(1) = 0.0f;
 		}
 
 	} else {
@@ -142,11 +142,7 @@ void DifferentialDriveControl::Run()
 		_velocity_control_inputs = {0.0f, 0.0f};
 	}
 
-// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
-	_differential_drive_kinematics.setInput(_input_feed_forward, true);
-	_output_inverse = _differential_drive_kinematics.getOutput(true);
-
-// publish data to actuator_motors (output module)
+	// publish data to actuator_motors (output module)
 	publishRateControl();
 
 	_last_timestamp = _current_timestamp;
@@ -155,6 +151,10 @@ void DifferentialDriveControl::Run()
 
 void DifferentialDriveControl::publishRateControl()
 {
+	// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
+	_differential_drive_kinematics.setInput(_velocity_control_inputs, true);
+	_output_inverse = _differential_drive_kinematics.getOutput(true);
+
 	// Superpose Linear and Angular velocity vector
 	float max_angular_wheel_speed = ((_param_rdd_max_forwards_velocity.get() + (_param_rdd_max_angular_velocity.get() *
 					  _param_rdd_wheel_base.get() / 2)) / _param_rdd_wheel_radius.get());
@@ -165,6 +165,22 @@ void DifferentialDriveControl::publishRateControl()
 	_actuator_motors.control[1] = _output_inverse(1) / max_angular_wheel_speed;
 
 	_outputs_pub.publish(_actuator_motors);
+}
+
+void DifferentialDriveControl::cruise_control_poll() // TODO: change this name, should not be poll, the whole function should go at one point, when the parameter api is here, the current velocity, requested can be subscribed from the actuators_motors topic
+{
+	rover_cruise_control_state_s rover_cruise_control_state{};
+
+	rover_cruise_control_state.timestamp = hrt_absolute_time();
+
+	rover_cruise_control_state.parameters[0] = _param_rdd_max_forwards_velocity.get();
+	rover_cruise_control_state.parameters[1] = _param_rdd_max_angular_velocity.get();
+	rover_cruise_control_state.parameters[2] = _param_rdd_cruise_gain.get();
+
+	rover_cruise_control_state.velocity_state[0] = _velocity_control_inputs(0);
+	rover_cruise_control_state.velocity_state[1] = _velocity_control_inputs(1);
+
+	_rover_cruise_control_state_pub.publish(rover_cruise_control_state);
 }
 
 void DifferentialDriveControl::vehicle_control_mode_poll()
