@@ -102,7 +102,7 @@ private:
 
 	DifferentialDriveKinematics _differential_drive_kinematics;
 
-	matrix::Vector2f _velocity_control_inputs{0.0f, 0.0f};  // _velocity_control_inputs[0] -> Vx [m/s], _velocity_control_inputs[1] -> Omega [rad/s]
+	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Linear Velocity in X [m/s], _input_feed_forward[1] -> Angular Velocity in Z [rad/s]
 	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 
 	float _last_timestamp{0.0};
@@ -115,8 +115,8 @@ private:
 		(ParamFloat<px4::params::RDD_MAX_FORW_VEL>) _param_rdd_max_forwards_velocity,
 		(ParamFloat<px4::params::RDD_MAX_ANG_VEL>) _param_rdd_max_angular_velocity,
 		(ParamFloat<px4::params::RDD_WHEEL_BASE>) _param_rdd_wheel_base,
-		(ParamFloat<px4::params::RDD_WHEEL_RADIUS>) _param_rdd_wheel_radius
-
+		(ParamFloat<px4::params::RDD_WHEEL_RADIUS>) _param_rdd_wheel_radius,
+		(ParamFloat<px4::params::RDD_CRUISE_GAIN>) _param_rdd_cruise_gain
 	)
 };
 

@@ -84,5 +84,15 @@ PARAM_DEFINE_FLOAT(RDD_MAX_FORW_VEL, 0.5f);
  */
 PARAM_DEFINE_FLOAT(RDD_MAX_ANG_VEL, 0.3f);
 
-
+/**
+ * Cruise Control Gain
+ *
+ *
+ * @min 0.0
+ * @max 100
+ * @increment 0.01
+ * @decimal 2
+ * @group Rover Differential Drive
+ */
+PARAM_DEFINE_FLOAT(RDD_CRUISE_GAIN, 0.01f);
 

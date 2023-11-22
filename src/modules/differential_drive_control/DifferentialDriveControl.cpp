@@ -105,15 +105,36 @@ void DifferentialDriveControl::Run()
 		updateParams();
 	}
 
+	if (_vehicle_control_mode.flag_armed) {
 
-	if (_vehicle_control_mode.flag_control_manual_enabled && _vehicle_control_mode.flag_armed) {
 		if (_manual_control_setpoint_sub.updated()) {
 			manual_control_setpoint_s manual_control_setpoint{};
 			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
 
-			// directly get the input from the manual control setpoint (joystick)
-			_velocity_control_inputs(0) = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
-			_velocity_control_inputs(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
+			// Manual mode
+			if (_vehicle_control_mode.flag_control_manual_enabled && !_vehicle_control_mode.flag_control_altitude_enabled) {
+				// directly get the input from the manual control setpoint (joystick)
+				_input_feed_forward(0) = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
+				_input_feed_forward(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
+
+				// Temporary Cruise Control mode
+
+			} else if (_vehicle_control_mode.flag_control_altitude_enabled) {
+
+				// Make sure we don't request more velocity than we can deliver
+				if (_input_feed_forward(0) >= _param_rdd_max_forwards_velocity.get() && (manual_control_setpoint.throttle >= 0.0f)) {
+					_input_feed_forward(0) = _param_rdd_max_forwards_velocity.get();
+
+				} else if (_input_feed_forward(0) <= -_param_rdd_max_forwards_velocity.get()
+					   && (manual_control_setpoint.throttle <= 0.0f)) {
+					_input_feed_forward(0) = -_param_rdd_max_forwards_velocity.get();
+
+				} else {
+					_input_feed_forward(0) = _input_feed_forward(0) + (manual_control_setpoint.throttle) * _param_rdd_cruise_gain.get();
+				}
+
+				_input_feed_forward(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
+			}
 		}
 
 	} else {
@@ -121,11 +142,11 @@ void DifferentialDriveControl::Run()
 		_velocity_control_inputs = {0.0f, 0.0f};
 	}
 
-	// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
-	_differential_drive_kinematics.setInput(_velocity_control_inputs, true);
+// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
+	_differential_drive_kinematics.setInput(_input_feed_forward, true);
 	_output_inverse = _differential_drive_kinematics.getOutput(true);
 
-	// publish data to actuator_motors (output module)
+// publish data to actuator_motors (output module)
 	publishRateControl();
 
 	_last_timestamp = _current_timestamp;
