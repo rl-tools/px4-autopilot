@@ -112,17 +112,17 @@ void DifferentialDriveControl::Run()
 			_manual_control_setpoint_sub.copy(&manual_control_setpoint);
 
 			// directly get the input from the manual control setpoint (joystick)
-			_input_feed_forward(0) = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
-			_input_feed_forward(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
+			_velocity_control_inputs(0) = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
+			_velocity_control_inputs(1) = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
 		}
 
 	} else {
 		// if the system is in an error state, stop the vehicle
-		_input_feed_forward = {0.0f, 0.0f};
+		_velocity_control_inputs = {0.0f, 0.0f};
 	}
 
 	// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
-	_differential_drive_kinematics.setInput(_input_feed_forward, true);
+	_differential_drive_kinematics.setInput(_velocity_control_inputs, true);
 	_output_inverse = _differential_drive_kinematics.getOutput(true);
 
 	// publish data to actuator_motors (output module)

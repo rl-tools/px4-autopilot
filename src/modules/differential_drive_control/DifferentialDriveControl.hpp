@@ -102,7 +102,7 @@ private:
 
 	DifferentialDriveKinematics _differential_drive_kinematics;
 
-	matrix::Vector2f _input_feed_forward{0.0f, 0.0f};  // _input_feed_forward[0] -> Vx [m/s], _input_feed_forward[1] -> Omega [rad/s]
+	matrix::Vector2f _velocity_control_inputs{0.0f, 0.0f};  // _velocity_control_inputs[0] -> Vx [m/s], _velocity_control_inputs[1] -> Omega [rad/s]
 	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output[0] -> Right Motor [rad/s], _output[1] -> Left Motor [rad/s]
 
 	float _last_timestamp{0.0};
