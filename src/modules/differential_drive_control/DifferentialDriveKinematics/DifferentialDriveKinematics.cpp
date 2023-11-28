@@ -20,8 +20,8 @@ void DifferentialDriveKinematics::setInput(const matrix::Vector2f &input, bool i
 
 void DifferentialDriveKinematics::computeInverseKinematics()
 {
-	_motor_vel_right = _linear_vel_x / _wheel_radius + _wheel_base / 2 * _yaw_rate / _wheel_radius;
-	_motor_vel_left = _linear_vel_x / _wheel_radius - _wheel_base / 2 * _yaw_rate / _wheel_radius;
+	_motor_vel_right = _linear_vel_x / _wheel_radius - _wheel_base / 2 * _yaw_rate / _wheel_radius;
+	_motor_vel_left = _linear_vel_x / _wheel_radius + _wheel_base / 2 * _yaw_rate / _wheel_radius;
 
 	_output_inverse(0) = _motor_vel_right;
 	_output_inverse(1) = _motor_vel_left;
