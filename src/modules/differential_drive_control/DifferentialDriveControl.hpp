@@ -91,7 +91,7 @@ public:
 private:
 
 	void Run() override;
-	void publishRateControl();
+	void publishWheelControl();
 	void vehicle_control_mode_poll();
 
 	uORB::PublicationMulti<actuator_motors_s> _outputs_pub{ORB_ID(actuator_motors)};

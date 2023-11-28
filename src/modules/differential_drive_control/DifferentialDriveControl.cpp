@@ -142,13 +142,13 @@ void DifferentialDriveControl::Run()
 	}
 
 	// publish data to actuator_motors (output module)
-	publishRateControl();
+	publishWheelControl();
 
 	_last_timestamp = _current_timestamp;
 
 }
 
-void DifferentialDriveControl::publishRateControl()
+void DifferentialDriveControl::publishWheelControl()
 {
 	// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
 	_differential_drive_kinematics.setInput(_velocity_control_inputs, true);
