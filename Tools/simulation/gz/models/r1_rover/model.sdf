@@ -372,7 +372,7 @@
 		<child>rf_wheel_link</child>
 		<parent>base_link</parent>
 		<axis>
-		  <xyz>0 1 0</xyz>
+		  <xyz>0 -1 0</xyz>
 		  <limit>
 		    <lower>-1e+16</lower>
 		    <upper>1e+16</upper>
@@ -454,7 +454,7 @@
 	    <child>rb_wheel_link</child>
 	    <parent>base_link</parent>
 	    <axis>
-	      <xyz>0 1 0</xyz>
+	      <xyz>0 -1 0</xyz>
 	      <limit>
 		<lower>-1e+16</lower>
 		<upper>1e+16</upper>
@@ -471,28 +471,28 @@
 		<joint_name>motor_0</joint_name>
 		<sub_topic>command/motor_speed</sub_topic>
 	      <use_actuator_msg>true</use_actuator_msg>
-	      <actuator_number>0</actuator_number>
+	      <actuator_number>1</actuator_number>
 		<p_gain>10.0</p_gain>
 	</plugin>
 	<plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
 	      <joint_name>motor_1</joint_name>
 	      <sub_topic>command/motor_speed</sub_topic>
 	    <use_actuator_msg>true</use_actuator_msg>
-	    <actuator_number>0</actuator_number>
+	    <actuator_number>1</actuator_number>
 	      <p_gain>10.0</p_gain>
        </plugin>
        <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
 	      <joint_name>motor_2</joint_name>
 	      <sub_topic>command/motor_speed</sub_topic>
 	    <use_actuator_msg>true</use_actuator_msg>
-	    <actuator_number>1</actuator_number>
+	    <actuator_number>0</actuator_number>
 	      <p_gain>10.0</p_gain>
        </plugin>
        <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
 	      <joint_name>motor_3</joint_name>
 	      <sub_topic>command/motor_speed</sub_topic>
 	    <use_actuator_msg>true</use_actuator_msg>
-	    <actuator_number>1</actuator_number>
+	    <actuator_number>0</actuator_number>
 	      <p_gain>10.0</p_gain>
        </plugin>
 	  <plugin
