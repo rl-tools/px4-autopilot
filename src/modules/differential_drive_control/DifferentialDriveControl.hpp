@@ -54,7 +54,6 @@
 
 // Cruise mode
 #include <uORB/topics/vehicle_rates_setpoint.h>
-#include <uORB/topics/rover_cruise_control_state.h>
 #include <uORB/topics/differential_drive_setpoint.h>
 
 // Standard library includes
@@ -94,10 +93,8 @@ private:
 	void Run() override;
 	void publishRateControl();
 	void vehicle_control_mode_poll();
-	void cruise_control_poll();
 
 	uORB::PublicationMulti<actuator_motors_s> _outputs_pub{ORB_ID(actuator_motors)};
-	uORB::Publication<rover_cruise_control_state_s> _rover_cruise_control_state_pub{ORB_ID(rover_cruise_control_state)};
 	uORB::Publication<differential_drive_setpoint_s> _differential_drive_setpoint_pub{ORB_ID(differential_drive_setpoint)};
 
 

@@ -169,8 +169,6 @@ set(msg_files
 	RcParameterMap.msg
 	RegisterExtComponentReply.msg
 	RegisterExtComponentRequest.msg
-	RoverCruiseControlState.msg
-	RoverCruiseControlVelocity.msg
 	Rpm.msg
 	RtlTimeEstimate.msg
 	SatelliteInfo.msg
