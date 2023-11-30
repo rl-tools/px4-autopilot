@@ -82,22 +82,6 @@ void DifferentialDriveControl::Run()
 
 	vehicle_control_mode_poll();
 
-	if (_vehicle_status_sub.updated()) {
-		vehicle_status_s vehicle_status;
-
-		if (_vehicle_status_sub.copy(&vehicle_status)) {
-			if (_arming_state != vehicle_status.arming_state) {
-				_arming_state = vehicle_status.arming_state;
-			}
-
-			bool system_calibrating = vehicle_status.calibration_enabled;
-
-			if (system_calibrating != _system_calibrating) {
-				_system_calibrating = system_calibrating;
-			}
-		}
-	}
-
 	if (_parameter_update_sub.updated()) {
 		parameter_update_s pupdate;
 		_parameter_update_sub.copy(&pupdate);
@@ -117,8 +101,8 @@ void DifferentialDriveControl::Run()
 
 				_differential_drive_setpoint.timestamp = hrt_absolute_time();
 
-				_differential_drive_setpoint.velocity = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
-				_differential_drive_setpoint.yaw = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
+				_differential_drive_setpoint.speed = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
+				_differential_drive_setpoint.yaw_rate = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
 
 				_differential_drive_setpoint_pub.publish(_differential_drive_setpoint);
 			}
@@ -128,8 +112,8 @@ void DifferentialDriveControl::Run()
 		if (_differential_drive_setpoint_sub.updated()) {
 			_differential_drive_setpoint_sub.copy(&_differential_drive_setpoint);
 
-			_velocity_control_inputs(0) = _differential_drive_setpoint.velocity;
-			_velocity_control_inputs(1) = _differential_drive_setpoint.yaw;
+			_velocity_control_inputs(0) = _differential_drive_setpoint.speed;
+			_velocity_control_inputs(1) = _differential_drive_setpoint.yaw_rate;
 
 		} else if (_differential_drive_setpoint.timestamp <= 100_ms) {
 			_velocity_control_inputs(0) = 0.0f;
@@ -151,8 +135,8 @@ void DifferentialDriveControl::Run()
 void DifferentialDriveControl::publishWheelControl()
 {
 	// get the wheel speeds from the inverse kinematics class (DifferentialDriveKinematics)
-	_differential_drive_kinematics.setInput(_velocity_control_inputs, true);
-	_output_inverse = _differential_drive_kinematics.getOutput(true);
+	_output_inverse = _differential_drive_kinematics.computeInverseKinematics(_velocity_control_inputs(0),
+			  _velocity_control_inputs(1));
 
 	// Superpose Linear and Angular velocity vector
 	float max_angular_wheel_speed = ((_param_rdd_max_forwards_velocity.get() + (_param_rdd_max_angular_velocity.get() *
