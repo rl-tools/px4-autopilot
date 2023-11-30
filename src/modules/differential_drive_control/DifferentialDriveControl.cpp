@@ -143,7 +143,7 @@ void DifferentialDriveControl::publishWheelControl()
 						_param_rdd_wheel_base.get() / 2.f)) / _param_rdd_wheel_radius.get());
 
 	// Check if max_angular_wheel_speed is zero
-	if (fabs(max_angular_wheel_speed) < FLT_EPSILON) {
+	if (fabsf(max_angular_wheel_speed) < FLT_EPSILON) {
 		PX4_ERR("Division by zero encountered in max_angular_wheel_speed calculation, please check the following parameters RDD_MAX_FORW_VEL, RDD_MAX_ANG_VEL, RDD_WHEEL_BASE and RDD_WHEEL_RADIUS");
 		return;
 	}
