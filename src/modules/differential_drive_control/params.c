@@ -32,21 +32,9 @@
  ****************************************************************************/
 
 /**
- * Wheel Base (Distance from wheel to wheel)
+ * Wheel Base
  *
- *
- * @unit m
- * @min 0.0
- * @max 100
- * @increment 0.001
- * @decimal 5
- * @reboot_required true
- * @group Rover Differential Drive
- */
-PARAM_DEFINE_FLOAT(RDD_WHEEL_BASE, 0.54f);
-
-/**
- * Wheel Radius
+ * Distance from the center of the right wheel to the center of the left wheel
  *
  * @unit m
  * @min 0.0
@@ -56,10 +44,23 @@ PARAM_DEFINE_FLOAT(RDD_WHEEL_BASE, 0.54f);
  * @reboot_required true
  * @group Rover Differential Drive
  */
-PARAM_DEFINE_FLOAT(RDD_WHEEL_RADIUS, 0.0686f);
+PARAM_DEFINE_FLOAT(RDD_WHEEL_BASE, 0.5f);
 
 /**
- * Max Forwards Velocity
+ * Wheel radius
+ *
+ * @unit m
+ * @min 0.0
+ * @max 100
+ * @increment 0.001
+ * @decimal 5
+ * @reboot_required true
+ * @group Rover Differential Drive
+ */
+PARAM_DEFINE_FLOAT(RDD_WHEEL_RADIUS, 0.1f);
+
+/**
+ * Max Speed
  *
  *
  * @unit m/s
