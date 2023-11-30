@@ -35,33 +35,42 @@
 
 #include <matrix/matrix/math.hpp>
 
+/**
+ * @brief Differential Drive Kinematics class for computing the kinematics of a differential drive robot.
+ *
+ * This class provides functions to set the wheel base and radius, and to compute the inverse kinematics
+ * given linear velocity and yaw rate.
+ */
 class DifferentialDriveKinematics
 {
 public:
 	DifferentialDriveKinematics() = default;
 	~DifferentialDriveKinematics() = default;
 
-	void computeInverseKinematics();
-	void computeForwardsKinematics();
-	void setWheelBase(float wheel_base);
-	void setWheelRadius(float wheel_radius);
-	void setInput(const matrix::Vector2f &input, bool inverse);
+	/**
+	 * @brief Computes the inverse kinematics for differential drive.
+	 *
+	 * @param linear_vel_x Linear velocity along the x-axis.
+	 * @param yaw_rate Yaw rate of the robot.
+	 * @return matrix::Vector2f Motor velocities for the right and left motors.
+	 */
+	matrix::Vector2f computeInverseKinematics(float linear_vel_x, float yaw_rate);
 
-	matrix::Vector2f getOutput(bool inverse) const;
+	/**
+	 * @brief Sets the wheel base of the robot.
+	 *
+	 * @param wheel_base The distance between the centers of the wheels.
+	 */
+	void setWheelBase(float wheel_base);
+
+	/**
+	 * @brief Sets the radius of the wheels of the robot.
+	 *
+	 * @param wheel_radius The radius of the wheels.
+	 */
+	void setWheelRadius(float wheel_radius);
 
 private:
-
-	matrix::Vector2f _input{0.0f, 0.0f};
-	matrix::Vector2f _output_inverse{0.0f, 0.0f}; // _output(0) -> Right Motor Speed [rad/s], _output(1) -> Left Motor Speed [rad/s]
-	matrix::Vector2f _output_forwards{0.0f, 0.0f}; // _output[0] -> Linear Velocity in X [rad/s], _output[1] -> Angular Velocity in Z [rad/s]
-
-	float _linear_vel_x{0.0f};
-	float _yaw_rate{0.0f};
-
-	float _motor_vel_right{0.0f};
-	float _motor_vel_left{0.0f};
-
 	float _wheel_base{1.0f};
 	float _wheel_radius{1.0f};
-
 };
