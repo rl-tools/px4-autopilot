@@ -120,7 +120,7 @@ private:
 	bool _system_calibrating{false};
 
 	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::RDD_MAX_FORW_VEL>) _param_rdd_max_forwards_velocity,
+		(ParamFloat<px4::params::RDD_MAX_SPEED>) _param_rdd_max_speed,
 		(ParamFloat<px4::params::RDD_MAX_ANG_VEL>) _param_rdd_max_angular_velocity,
 		(ParamFloat<px4::params::RDD_WHEEL_BASE>) _param_rdd_wheel_base,
 		(ParamFloat<px4::params::RDD_WHEEL_RADIUS>) _param_rdd_wheel_radius

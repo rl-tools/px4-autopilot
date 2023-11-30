@@ -101,7 +101,7 @@ void DifferentialDriveControl::Run()
 
 				_differential_drive_setpoint.timestamp = hrt_absolute_time();
 
-				_differential_drive_setpoint.speed = manual_control_setpoint.throttle * _param_rdd_max_forwards_velocity.get();
+				_differential_drive_setpoint.speed = manual_control_setpoint.throttle * _param_rdd_max_speed.get();
 				_differential_drive_setpoint.yaw_rate = manual_control_setpoint.roll * _param_rdd_max_angular_velocity.get();
 
 				_differential_drive_setpoint_pub.publish(_differential_drive_setpoint);
@@ -139,10 +139,18 @@ void DifferentialDriveControl::publishWheelControl()
 			  _velocity_control_inputs(1));
 
 	// Superpose Linear and Angular velocity vector
-	float max_angular_wheel_speed = ((_param_rdd_max_forwards_velocity.get() + (_param_rdd_max_angular_velocity.get() *
-					  _param_rdd_wheel_base.get() / 2)) / _param_rdd_wheel_radius.get());
+	const float max_angular_wheel_speed = ((_param_rdd_max_speed.get() + (_param_rdd_max_angular_velocity.get() *
+						_param_rdd_wheel_base.get() / 2.f)) / _param_rdd_wheel_radius.get());
+
+	// Check if max_angular_wheel_speed is zero
+	if (fabs(max_angular_wheel_speed) < FLT_EPSILON) {
+		PX4_ERR("Division by zero encountered in max_angular_wheel_speed calculation, please check the following parameters RDD_MAX_FORW_VEL, RDD_MAX_ANG_VEL, RDD_WHEEL_BASE and RDD_WHEEL_RADIUS");
+		return;
+	}
 
 	_actuator_motors.timestamp = hrt_absolute_time();
+
+	// bitset which motors are configured to be reversible (3 -> ..00 0000 0011 this means that the first two motors are reversible)
 	_actuator_motors.reversible_flags = 3;
 	_actuator_motors.control[0] = _output_inverse(0) / max_angular_wheel_speed;
 	_actuator_motors.control[1] = _output_inverse(1) / max_angular_wheel_speed;
