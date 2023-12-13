@@ -396,9 +396,9 @@ void LoggedTopics::add_raw_imu_accel_fifo()
 void LoggedTopics::add_system_identification_topics()
 {
 	// for system id need to log imu and controls at full rate
-	add_topic("sensor_combined");
+	add_topic("actuator_motors");
+	add_topic("vehicle_acceleration");
 	add_topic("vehicle_angular_velocity");
-	add_topic("vehicle_torque_setpoint");
 }
 
 void LoggedTopics::add_mavlink_tunnel()
