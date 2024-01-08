@@ -25,3 +25,7 @@ then
 fi
 
 safety_button start
+
+actuator_motors_multiplexer start
+rl_tools_policy start
+rl_tools_commander start
