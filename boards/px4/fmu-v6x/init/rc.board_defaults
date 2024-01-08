@@ -19,3 +19,7 @@ param set-default SENS_EN_INA226 1
 param set-default SYS_USE_IO 1
 
 safety_button start
+
+actuator_motors_multiplexer start
+rl_tools_policy start
+rl_tools_commander start
