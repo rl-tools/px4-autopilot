@@ -400,6 +400,7 @@ void LoggedTopics::add_system_identification_topics()
 	add_topic("actuator_motors_rl_tools");
 	add_topic("actuator_motors_mux");
 	add_topic("rl_tools_policy_status");
+	add_topic("rl_tools_policy_input");
 	add_topic("rl_tools_command");
 	add_topic("rl_tools_multiplexer_status");
 	add_topic("vehicle_attitude");
