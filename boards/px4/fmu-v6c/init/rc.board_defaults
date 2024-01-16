@@ -13,3 +13,5 @@ param set-default BAT2_A_PER_V 36.367515152
 actuator_motors_multiplexer start
 rl_tools_policy start
 rl_tools_commander start
+logger stop
+logger start -r 500 -b 50
