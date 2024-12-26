@@ -140,6 +140,8 @@ ifdef RL_TOOLS_ROOT
 	override CMAKE_ARGS += -DRL_TOOLS_ROOT:STRING=$(RL_TOOLS_ROOT)
 endif
 
+override CMAKE_ARGS += -DCMAKE_C_FLAGS="-fmax-errors=1" -DCMAKE_CXX_FLAGS="-fmax-errors=1"
+
 ifdef PX4_CMAKE_BUILD_TYPE
 	override CMAKE_ARGS += -DCMAKE_BUILD_TYPE=${PX4_CMAKE_BUILD_TYPE}
 else
