@@ -437,8 +437,8 @@ void Sih::reconstruct_sensors_signals(const hrt_abstime &time_now_us)
 	//     In 2018 IEEE International Conference on Robotics and Automation (ICRA), pp. 6573-6580. IEEE, 2018.
 
 	// IMU
-	Vector3f acc = _C_IB.transpose() * (_v_I_dot - Vector3f(0.0f, 0.0f, CONSTANTS_ONE_G));// + noiseGauss3f(0.5f, 1.7f, 1.4f);
-	Vector3f gyro = _w_B;// + noiseGauss3f(0.14f, 0.07f, 0.03f);
+	Vector3f acc = _C_IB.transpose() * (_v_I_dot - Vector3f(0.0f, 0.0f, CONSTANTS_ONE_G)) + noiseGauss3f(0.5f, 1.7f, 1.4f);
+	Vector3f gyro = _w_B + noiseGauss3f(0.14f, 0.07f, 0.03f);
 
 	// update IMU every iteration
 	_px4_accel.update(time_now_us, acc(0), acc(1), acc(2));
