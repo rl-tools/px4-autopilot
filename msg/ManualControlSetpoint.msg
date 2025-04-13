@@ -42,3 +42,6 @@ bool sticks_moving
 # DEPRECATED: float32 y
 # DEPRECATED: float32 z
 # DEPRECATED: float32 r
+
+
+uint16 buttons
