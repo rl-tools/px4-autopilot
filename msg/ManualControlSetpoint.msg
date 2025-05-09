@@ -44,3 +44,6 @@ uint16 buttons		# From uint16 buttons field of Mavlink manual_control message
 # DEPRECATED: float32 y
 # DEPRECATED: float32 z
 # DEPRECATED: float32 r
+
+
+uint16 buttons
