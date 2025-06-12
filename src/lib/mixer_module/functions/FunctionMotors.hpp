@@ -49,7 +49,7 @@ public:
 	static_assert(actuator_motors_s::ACTUATOR_FUNCTION_MOTOR1 == (int)OutputFunction::Motor1, "Unexpected motor idx");
 
 	FunctionMotors(const Context &context) :
-		_topic(&context.work_item, ORB_ID(actuator_motors)),
+		_topic(&context.work_item, ORB_ID(actuator_motors_mux)),
 		_thrust_factor(context.thrust_factor)
 	{
 		for (int i = 0; i < actuator_motors_s::NUM_CONTROLS; ++i) {

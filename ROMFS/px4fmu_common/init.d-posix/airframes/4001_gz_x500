@@ -52,3 +52,12 @@ param set-default SIM_GZ_EC_MAX3 1000
 param set-default SIM_GZ_EC_MAX4 1000
 
 param set-default MPC_THR_HOVER 0.60
+
+param set IMU_GYRO_CUTOFF 200
+param set SDLOG_PROFILE 155
+param set RLT_ACTIV_SRC 1
+param set RLT_ACTIV_BTN 10
+
+actuator_motors_multiplexer start
+rl_tools_policy start
+rl_tools_commander start

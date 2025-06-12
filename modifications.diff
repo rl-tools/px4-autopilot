@@ -1,0 +1,351 @@
+diff --git a/.gitmodules b/.gitmodules
+index e443da19a2..a0bc8a2152 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -12,7 +12,7 @@
+ 	branch = main
+ [submodule "Tools/simulation/gazebo-classic/sitl_gazebo-classic"]
+ 	path = Tools/simulation/gazebo-classic/sitl_gazebo-classic
+-	url = https://github.com/PX4/PX4-SITL_gazebo-classic.git
++	url = https://github.com/rl-tools/px4-sitl-gazebo-classic.git
+ 	branch = main
+ [submodule "src/drivers/gps/devices"]
+ 	path = src/drivers/gps/devices
+diff --git a/Makefile b/Makefile
+index 5560322dde..29b034c93c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -136,6 +136,10 @@ ifdef EXTERNAL_MODULES_LOCATION
+ 	override CMAKE_ARGS += -DEXTERNAL_MODULES_LOCATION:STRING=$(EXTERNAL_MODULES_LOCATION)
+ endif
+ 
++ifdef RL_TOOLS_ROOT
++	override CMAKE_ARGS += -DRL_TOOLS_ROOT:STRING=$(RL_TOOLS_ROOT)
++endif
++
+ ifdef PX4_CMAKE_BUILD_TYPE
+ 	override CMAKE_ARGS += -DCMAKE_BUILD_TYPE=${PX4_CMAKE_BUILD_TYPE}
+ else
+diff --git a/ROMFS/px4fmu_common/init.d-posix/airframes/4001_gz_x500 b/ROMFS/px4fmu_common/init.d-posix/airframes/4001_gz_x500
+index bb6bedd386..a1e57fa6bc 100644
+--- a/ROMFS/px4fmu_common/init.d-posix/airframes/4001_gz_x500
++++ b/ROMFS/px4fmu_common/init.d-posix/airframes/4001_gz_x500
+@@ -52,3 +52,12 @@ param set-default SIM_GZ_EC_MAX3 1000
+ param set-default SIM_GZ_EC_MAX4 1000
+ 
+ param set-default MPC_THR_HOVER 0.60
++
++param set IMU_GYRO_CUTOFF 200
++param set SDLOG_PROFILE 155
++param set RLT_ACTIV_SRC 1
++param set RLT_ACTIV_BTN 10
++
++actuator_motors_multiplexer start
++rl_tools_policy start
++rl_tools_commander start
+\ No newline at end of file
+diff --git a/boards/mro/pixracerpro/default.px4board b/boards/mro/pixracerpro/default.px4board
+index fb49c90866..c9f6eae5d1 100644
+--- a/boards/mro/pixracerpro/default.px4board
++++ b/boards/mro/pixracerpro/default.px4board
+@@ -7,8 +7,8 @@ CONFIG_DRIVERS_ADC_ADS1115=y
+ CONFIG_DRIVERS_ADC_BOARD_ADC=y
+ CONFIG_DRIVERS_BAROMETER_DPS310=y
+ CONFIG_DRIVERS_BATT_SMBUS=y
+-CONFIG_DRIVERS_CAMERA_CAPTURE=y
+-CONFIG_DRIVERS_CAMERA_TRIGGER=y
++CONFIG_DRIVERS_CAMERA_CAPTURE=n
++CONFIG_DRIVERS_CAMERA_TRIGGER=n
+ CONFIG_DRIVERS_CDCACM_AUTOSTART=y
+ CONFIG_COMMON_DIFFERENTIAL_PRESSURE=y
+ CONFIG_COMMON_DISTANCE_SENSOR=y
+@@ -22,7 +22,7 @@ CONFIG_DRIVERS_IMU_INVENSENSE_ICM20948=y
+ CONFIG_DRIVERS_IRLOCK=y
+ CONFIG_COMMON_LIGHT=y
+ CONFIG_COMMON_MAGNETOMETER=y
+-CONFIG_COMMON_OPTICAL_FLOW=y
++CONFIG_COMMON_OPTICAL_FLOW=n
+ CONFIG_DRIVERS_PCA9685_PWM_OUT=y
+ CONFIG_DRIVERS_POWER_MONITOR_INA226=y
+ CONFIG_DRIVERS_PWM_OUT=y
+@@ -30,10 +30,10 @@ CONFIG_DRIVERS_RC_INPUT=y
+ CONFIG_DRIVERS_SMART_BATTERY_BATMON=y
+ CONFIG_COMMON_TELEMETRY=y
+ CONFIG_DRIVERS_TONE_ALARM=y
+-CONFIG_DRIVERS_UAVCAN=y
++CONFIG_DRIVERS_UAVCAN=n
+ CONFIG_MODULES_AIRSPEED_SELECTOR=y
+ CONFIG_MODULES_BATTERY_STATUS=y
+-CONFIG_MODULES_CAMERA_FEEDBACK=y
++CONFIG_MODULES_CAMERA_FEEDBACK=n
+ CONFIG_MODULES_COMMANDER=y
+ CONFIG_MODULES_CONTROL_ALLOCATOR=y
+ CONFIG_MODULES_DATAMAN=y
+@@ -64,7 +64,7 @@ CONFIG_MODULES_NAVIGATOR=y
+ CONFIG_MODULES_RC_UPDATE=y
+ CONFIG_MODULES_ROVER_POS_CONTROL=y
+ CONFIG_MODULES_SENSORS=y
+-CONFIG_MODULES_SIMULATION_SIMULATOR_SIH=y
++CONFIG_MODULES_SIMULATION_SIMULATOR_SIH=n
+ CONFIG_MODULES_TEMPERATURE_COMPENSATION=y
+ CONFIG_MODULES_UUV_ATT_CONTROL=y
+ CONFIG_MODULES_UUV_POS_CONTROL=y
+diff --git a/boards/mro/pixracerpro/init/rc.board_extras b/boards/mro/pixracerpro/init/rc.board_extras
+index ccf9223a5b..91c6f45eb8 100644
+--- a/boards/mro/pixracerpro/init/rc.board_extras
++++ b/boards/mro/pixracerpro/init/rc.board_extras
+@@ -8,3 +8,6 @@ if param compare TEL_FRSKY_CONFIG 0
+ then
+ 	frsky_telemetry start -d /dev/ttyS6 -t 15
+ fi
++actuator_motors_multiplexer start
++rl_tools_policy start
++rl_tools_commander start
+diff --git a/boards/px4/fmu-v5/test.px4board b/boards/px4/fmu-v5/test.px4board
+index 2dcd6925f2..e6c6afd09e 100644
+--- a/boards/px4/fmu-v5/test.px4board
++++ b/boards/px4/fmu-v5/test.px4board
+@@ -18,5 +18,9 @@ CONFIG_MODULES_SIMULATION_SIMULATOR_SIH=n
+ CONFIG_BOARD_TESTING=y
+ CONFIG_DRIVERS_TEST_PPM=y
+ CONFIG_SYSTEMCMDS_MICROBENCH=y
++CONFIG_MODULES_FW_ATT_CONTROL=n
++CONFIG_MODULES_FW_AUTOTUNE_ATTITUDE_CONTROL=n
++CONFIG_MODULES_FW_POS_CONTROL=n
++CONFIG_MODULES_FW_RATE_CONTROL=n
+ CONFIG_SYSTEMCMDS_SD_STRESS=y
+ CONFIG_SYSTEMCMDS_SERIAL_TEST=y
+diff --git a/boards/px4/fmu-v6c/default.px4board b/boards/px4/fmu-v6c/default.px4board
+index 95741b9eb2..6c23a38a86 100644
+--- a/boards/px4/fmu-v6c/default.px4board
++++ b/boards/px4/fmu-v6c/default.px4board
+@@ -8,8 +8,8 @@ CONFIG_BOARD_SERIAL_TEL3="/dev/ttyS1"
+ CONFIG_DRIVERS_ADC_BOARD_ADC=y
+ CONFIG_DRIVERS_BAROMETER_MS5611=y
+ CONFIG_DRIVERS_BATT_SMBUS=y
+-CONFIG_DRIVERS_CAMERA_CAPTURE=y
+-CONFIG_DRIVERS_CAMERA_TRIGGER=y
++CONFIG_DRIVERS_CAMERA_CAPTURE=n
++CONFIG_DRIVERS_CAMERA_TRIGGER=n
+ CONFIG_DRIVERS_CDCACM_AUTOSTART=y
+ CONFIG_COMMON_DIFFERENTIAL_PRESSURE=y
+ CONFIG_COMMON_DISTANCE_SENSOR=y
+@@ -23,7 +23,7 @@ CONFIG_DRIVERS_IMU_INVENSENSE_ICM42688P=y
+ CONFIG_COMMON_INS=y
+ CONFIG_COMMON_LIGHT=y
+ CONFIG_COMMON_MAGNETOMETER=y
+-CONFIG_COMMON_OPTICAL_FLOW=y
++CONFIG_COMMON_OPTICAL_FLOW=n
+ CONFIG_DRIVERS_POWER_MONITOR_INA226=y
+ CONFIG_DRIVERS_POWER_MONITOR_INA228=y
+ CONFIG_DRIVERS_POWER_MONITOR_INA238=y
+@@ -31,11 +31,11 @@ CONFIG_DRIVERS_PWM_OUT=y
+ CONFIG_DRIVERS_PX4IO=y
+ CONFIG_COMMON_TELEMETRY=y
+ CONFIG_DRIVERS_TONE_ALARM=y
+-CONFIG_DRIVERS_UAVCAN=y
++CONFIG_DRIVERS_UAVCAN=n
+ CONFIG_BOARD_UAVCAN_TIMER_OVERRIDE=2
+ CONFIG_MODULES_AIRSPEED_SELECTOR=y
+ CONFIG_MODULES_BATTERY_STATUS=y
+-CONFIG_MODULES_CAMERA_FEEDBACK=y
++CONFIG_MODULES_CAMERA_FEEDBACK=n
+ CONFIG_MODULES_COMMANDER=y
+ CONFIG_MODULES_CONTROL_ALLOCATOR=y
+ CONFIG_MODULES_DATAMAN=y
+diff --git a/boards/px4/fmu-v6c/init/rc.board_defaults b/boards/px4/fmu-v6c/init/rc.board_defaults
+index f7dd269721..5e4b80bf99 100644
+--- a/boards/px4/fmu-v6c/init/rc.board_defaults
++++ b/boards/px4/fmu-v6c/init/rc.board_defaults
+@@ -9,3 +9,11 @@ param set-default BAT2_V_DIV 18.1
+ 
+ param set-default BAT1_A_PER_V 36.367515152
+ param set-default BAT2_A_PER_V 36.367515152
++
++param set-default SYS_USE_IO 1
++
++actuator_motors_multiplexer start
++rl_tools_policy start
++rl_tools_commander start
++logger stop
++logger start -r 500 -b 50
+diff --git a/boards/px4/fmu-v6x/default.px4board b/boards/px4/fmu-v6x/default.px4board
+index 43de6e915e..5955719c90 100644
+--- a/boards/px4/fmu-v6x/default.px4board
++++ b/boards/px4/fmu-v6x/default.px4board
+@@ -12,8 +12,8 @@ CONFIG_DRIVERS_ADC_BOARD_ADC=y
+ CONFIG_DRIVERS_BAROMETER_BMP388=y
+ CONFIG_DRIVERS_BAROMETER_INVENSENSE_ICP201XX=y
+ CONFIG_DRIVERS_BAROMETER_MS5611=y
+-CONFIG_DRIVERS_CAMERA_CAPTURE=y
+-CONFIG_DRIVERS_CAMERA_TRIGGER=y
++CONFIG_DRIVERS_CAMERA_CAPTURE=n
++CONFIG_DRIVERS_CAMERA_TRIGGER=n
+ CONFIG_DRIVERS_CDCACM_AUTOSTART=y
+ CONFIG_COMMON_DIFFERENTIAL_PRESSURE=y
+ CONFIG_COMMON_DISTANCE_SENSOR=y
+@@ -33,7 +33,8 @@ CONFIG_DRIVERS_IMU_INVENSENSE_IIM42652=y
+ CONFIG_COMMON_INS=y
+ CONFIG_COMMON_LIGHT=y
+ CONFIG_COMMON_MAGNETOMETER=y
+-CONFIG_DRIVERS_OSD_MSP_OSD=y
++CONFIG_COMMON_OPTICAL_FLOW=y
++CONFIG_COMMON_OSD=y
+ CONFIG_DRIVERS_POWER_MONITOR_INA226=y
+ CONFIG_DRIVERS_POWER_MONITOR_INA228=y
+ CONFIG_DRIVERS_POWER_MONITOR_INA238=y
+@@ -43,11 +44,11 @@ CONFIG_DRIVERS_PX4IO=y
+ CONFIG_DRIVERS_RC_INPUT=y
+ CONFIG_DRIVERS_SAFETY_BUTTON=y
+ CONFIG_DRIVERS_TONE_ALARM=y
+-CONFIG_DRIVERS_UAVCAN=y
++CONFIG_DRIVERS_UAVCAN=n
+ CONFIG_BOARD_UAVCAN_TIMER_OVERRIDE=2
+ CONFIG_MODULES_AIRSPEED_SELECTOR=y
+ CONFIG_MODULES_BATTERY_STATUS=y
+-CONFIG_MODULES_CAMERA_FEEDBACK=y
++CONFIG_MODULES_CAMERA_FEEDBACK=n
+ CONFIG_MODULES_COMMANDER=y
+ CONFIG_MODULES_CONTROL_ALLOCATOR=y
+ CONFIG_MODULES_DATAMAN=y
+@@ -95,6 +96,7 @@ CONFIG_SYSTEMCMDS_NSHTERM=y
+ CONFIG_SYSTEMCMDS_PARAM=y
+ CONFIG_SYSTEMCMDS_PERF=y
+ CONFIG_SYSTEMCMDS_REBOOT=y
++CONFIG_SYSTEMCMDS_SD_BENCH=y
+ CONFIG_SYSTEMCMDS_SYSTEM_TIME=y
+ CONFIG_SYSTEMCMDS_TOP=y
+ CONFIG_SYSTEMCMDS_TOPIC_LISTENER=y
+diff --git a/boards/px4/fmu-v6x/init/rc.board_defaults b/boards/px4/fmu-v6x/init/rc.board_defaults
+index 95d873475b..028056212a 100644
+--- a/boards/px4/fmu-v6x/init/rc.board_defaults
++++ b/boards/px4/fmu-v6x/init/rc.board_defaults
+@@ -25,3 +25,9 @@ then
+ fi
+ 
+ safety_button start
++
++actuator_motors_multiplexer start
++rl_tools_policy start
++rl_tools_commander start
++logger stop
++logger start -r 500 -b 50
+\ No newline at end of file
+diff --git a/boards/px4/sitl/default.px4board b/boards/px4/sitl/default.px4board
+index 7dd7ce481a..49af85162a 100644
+--- a/boards/px4/sitl/default.px4board
++++ b/boards/px4/sitl/default.px4board
+@@ -77,3 +77,6 @@ CONFIG_EXAMPLES_HELLO=y
+ CONFIG_EXAMPLES_PX4_MAVLINK_DEBUG=y
+ CONFIG_EXAMPLES_PX4_SIMPLE_APP=y
+ CONFIG_EXAMPLES_WORK_ITEM=y
++CONFIG_MODULES_ACTUATOR_MOTORS_MULTIPLEXER=y
++CONFIG_MODULES_RL_TOOLS_BENCHMARK=y
++CONFIG_MODULES_RL_TOOLS_POLICY=y
+diff --git a/cmake/px4_add_common_flags.cmake b/cmake/px4_add_common_flags.cmake
+index 3daedfa044..72b139493c 100644
+--- a/cmake/px4_add_common_flags.cmake
++++ b/cmake/px4_add_common_flags.cmake
+@@ -84,6 +84,7 @@ function(px4_add_common_flags)
+ 		-Wuninitialized
+ 		-Wunknown-pragmas
+ 		-Wunused-variable
++		-Wno-array-bounds
+ 
+ 		# disabled warnings
+ 		-Wno-missing-field-initializers
+diff --git a/msg/ActuatorMotors.msg b/msg/ActuatorMotors.msg
+index e74566f1f7..46a7b23748 100644
+--- a/msg/ActuatorMotors.msg
++++ b/msg/ActuatorMotors.msg
+@@ -1,4 +1,5 @@
+ # Motor control message
++# TOPICS actuator_motors actuator_motors_mux actuator_motors_rl_tools
+ uint64 timestamp			# time since system start (microseconds)
+ uint64 timestamp_sample	    # the timestamp the data this control response is based on was sampled
+ 
+diff --git a/msg/ManualControlSetpoint.msg b/msg/ManualControlSetpoint.msg
+index 95fa622283..d24353e7ed 100644
+--- a/msg/ManualControlSetpoint.msg
++++ b/msg/ManualControlSetpoint.msg
+@@ -43,4 +43,4 @@ uint16 buttons		# From uint16 buttons field of Mavlink manual_control message
+ # DEPRECATED: float32 x
+ # DEPRECATED: float32 y
+ # DEPRECATED: float32 z
+-# DEPRECATED: float32 r
++# DEPRECATED: float32 r
+\ No newline at end of file
+diff --git a/platforms/posix/src/px4/common/px4_daemon/pxh.cpp b/platforms/posix/src/px4/common/px4_daemon/pxh.cpp
+index 9bcf0268ad..1fd4e13804 100644
+--- a/platforms/posix/src/px4/common/px4_daemon/pxh.cpp
++++ b/platforms/posix/src/px4/common/px4_daemon/pxh.cpp
+@@ -49,6 +49,7 @@
+ #include <poll.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++#include <cstdint>
+ 
+ #include "pxh.h"
+ 
+diff --git a/src/lib/mixer_module/functions/FunctionMotors.hpp b/src/lib/mixer_module/functions/FunctionMotors.hpp
+index fa42c8b63d..5af5901742 100644
+--- a/src/lib/mixer_module/functions/FunctionMotors.hpp
++++ b/src/lib/mixer_module/functions/FunctionMotors.hpp
+@@ -49,7 +49,7 @@ public:
+ 	static_assert(actuator_motors_s::ACTUATOR_FUNCTION_MOTOR1 == (int)OutputFunction::Motor1, "Unexpected motor idx");
+ 
+ 	FunctionMotors(const Context &context) :
+-		_topic(&context.work_item, ORB_ID(actuator_motors)),
++		_topic(&context.work_item, ORB_ID(actuator_motors_mux)),
+ 		_thrust_factor(context.thrust_factor)
+ 	{
+ 		for (int i = 0; i < actuator_motors_s::NUM_CONTROLS; ++i) {
+diff --git a/src/modules/commander/failure_detector/FailureDetector.hpp b/src/modules/commander/failure_detector/FailureDetector.hpp
+index e89719d2aa..53373d90e6 100644
+--- a/src/modules/commander/failure_detector/FailureDetector.hpp
++++ b/src/modules/commander/failure_detector/FailureDetector.hpp
+@@ -137,7 +137,7 @@ private:
+ 	uORB::Subscription _pwm_input_sub{ORB_ID(pwm_input)};
+ 	uORB::Subscription _sensor_selection_sub{ORB_ID(sensor_selection)};
+ 	uORB::Subscription _vehicle_imu_status_sub{ORB_ID(vehicle_imu_status)};
+-	uORB::Subscription _actuator_motors_sub{ORB_ID(actuator_motors)};
++	uORB::Subscription _actuator_motors_sub{ORB_ID(actuator_motors_mux)};
+ 
+ 	FailureInjector _failure_injector;
+ 
+diff --git a/src/modules/logger/logged_topics.cpp b/src/modules/logger/logged_topics.cpp
+index 731f087f79..4eb5e5014d 100644
+--- a/src/modules/logger/logged_topics.cpp
++++ b/src/modules/logger/logged_topics.cpp
+@@ -396,9 +396,17 @@ void LoggedTopics::add_raw_imu_accel_fifo()
+ void LoggedTopics::add_system_identification_topics()
+ {
+ 	// for system id need to log imu and controls at full rate
+-	add_topic("sensor_combined");
++	add_topic("actuator_motors");
++	add_topic("actuator_motors_rl_tools");
++	add_topic("actuator_motors_mux");
++	add_topic("rl_tools_policy_status");
++	add_topic("rl_tools_policy_input");
++	add_topic("rl_tools_command");
++	add_topic("rl_tools_multiplexer_status");
++	add_topic("vehicle_attitude");
++	add_topic("vehicle_acceleration");
+ 	add_topic("vehicle_angular_velocity");
+-	add_topic("vehicle_torque_setpoint");
++	add_topic("vehicle_local_position");
+ }
+ 
+ void LoggedTopics::add_mavlink_tunnel()
+diff --git a/src/modules/mavlink/mavlink_receiver.cpp b/src/modules/mavlink/mavlink_receiver.cpp
+index 0385c6a1eb..ddcd9545bd 100644
+--- a/src/modules/mavlink/mavlink_receiver.cpp
++++ b/src/modules/mavlink/mavlink_receiver.cpp
+@@ -2088,6 +2088,7 @@ MavlinkReceiver::handle_message_manual_control(mavlink_message_t *msg)
+ 	// Pass along the button states
+ 	manual_control_setpoint.buttons = mavlink_manual_control.buttons;
+ 	manual_control_setpoint.data_source = manual_control_setpoint_s::SOURCE_MAVLINK_0 + _mavlink->get_instance_id();
++	manual_control_setpoint.buttons = mavlink_manual_control.buttons;
+ 	manual_control_setpoint.timestamp = manual_control_setpoint.timestamp_sample = hrt_absolute_time();
+ 	manual_control_setpoint.valid = true;
+ 	_manual_control_input_pub.publish(manual_control_setpoint);
