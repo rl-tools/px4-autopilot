@@ -1067,6 +1067,8 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 				setpoint.timestamp = hrt_absolute_time();
 				_trajectory_setpoint_pub.publish(setpoint);
 			}
+			setpoint.timestamp = hrt_absolute_time();
+			_trajectory_setpoint_rlt_pub.publish(setpoint);
 
 		} else {
 			mavlink_log_critical(&_mavlink_log_pub, "SET_POSITION_TARGET_LOCAL_NED invalid\t");
