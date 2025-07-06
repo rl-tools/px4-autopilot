@@ -403,6 +403,7 @@ void LoggedTopics::add_system_identification_topics()
 	add_topic("rl_tools_policy_input");
 	add_topic("rl_tools_command");
 	add_topic("rl_tools_multiplexer_status");
+	add_topic("vehicle_visual_odometry");
 	add_topic("vehicle_attitude");
 	add_topic("vehicle_acceleration");
 	add_topic("vehicle_angular_velocity");
